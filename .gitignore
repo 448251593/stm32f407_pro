@@ -1,0 +1,7 @@
+*.o
+*.d
+*.crf
+*.html
+*.chm
+STM32F40_41xxx/
+Documentation/
