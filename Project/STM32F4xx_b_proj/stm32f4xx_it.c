@@ -142,6 +142,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   TimingDelay_Decrement();
+   systick_call_usart();
 }
 
 /******************************************************************************/
@@ -150,7 +151,15 @@ void SysTick_Handler(void)
 /*  available peripheral interrupt handler's name please refer to the startup */
 /*  file (startup_stm32f4xx.s).                                               */
 /******************************************************************************/
-
+/**
+* @brief  This function handles USRAT interrupt request.
+* @param  None
+* @retval None
+*/
+void USARTx_IRQHandler(void)
+{
+	data_recv_usart();
+}
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None
