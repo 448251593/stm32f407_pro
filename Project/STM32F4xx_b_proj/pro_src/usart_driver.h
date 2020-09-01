@@ -50,8 +50,8 @@
 #endif
 
 /* Exported typedef -----------------------------------------------------------*/
-#define countof(a)   (sizeof(a) / sizeof(*(a)))
-typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
+// #define countof(a)   (sizeof(a) / sizeof(*(a)))
+// typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
 /* Exported define ------------------------------------------------------------*/
 
@@ -70,13 +70,13 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 #define USARTx_IRQHandler                USART3_IRQHandler
 
 #define USARTx_TX_PIN                    GPIO_Pin_10
-#define USARTx_TX_GPIO_PORT              GPIOC
+#define USARTx_TX_GPIO_PORT              GPIOB//GPIOC //add by bcg,2020-09-01 11:47:03
 #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
 #define USARTx_TX_SOURCE                 GPIO_PinSource10
 #define USARTx_TX_AF                     GPIO_AF_USART3
 
 #define USARTx_RX_PIN                    GPIO_Pin_11
-#define USARTx_RX_GPIO_PORT              GPIOC
+#define USARTx_RX_GPIO_PORT              GPIOB//GPIOC
 #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
 #define USARTx_RX_SOURCE                 GPIO_PinSource11
 #define USARTx_RX_AF                     GPIO_AF_USART3

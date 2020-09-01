@@ -28,6 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usart_driver.h"
+#include "spi_driver.h"
 /** @addtogroup Template_Project
   * @{
   */

@@ -27,7 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "spi_driver.h"
-
+#include "main.h"
 /** @addtogroup STM32F4xx_StdPeriph_Examples
   * @{
   */
@@ -52,7 +52,7 @@ __IO uint32_t spi_TimeOut = 0;
 // extern __IO uint32_t spi_TimeOut;
 __IO uint8_t spi_ubCounter = 0;
 SPI_InitTypeDef  SPI_InitStructure;
-
+void  spi_driver_select_init(void);
 /* Private function prototypes -----------------------------------------------*/
 static void SPI_Config(void);
 
@@ -74,8 +74,8 @@ int spix_driver_init(void)
      */
 
   /* SPI configuration */
-  SPI_Config();
-
+  	SPI_Config();
+	spi_driver_select_init();
   /* SysTick configuration */
 //   SysTickConfig();
 
@@ -93,10 +93,10 @@ int spix_driver_init(void)
 
   /* The Data transfer is performed in the SPI interrupt routine */
   /* Configure the Tamper Button */
-  STM_EVAL_PBInit(BUTTON_TAMPER,BUTTON_MODE_GPIO);
+//   STM_EVAL_PBInit(BUTTON_TAMPER,BUTTON_MODE_GPIO);
 
   /* Wait until Tamper Button is pressed */
-  while (STM_EVAL_PBGetState(BUTTON_TAMPER));
+//   while (STM_EVAL_PBGetState(BUTTON_TAMPER));
 
   /* Enable the SPI peripheral */
   SPI_Cmd(SPIx, ENABLE);
@@ -318,6 +318,38 @@ void spix_driver_irqhandler(void)
 	}
 }
 
+//add by bcg,2020-09-01 11:54:53
+void   spi_driver_select(uint8_t spi_id)
+{
+	if (spi_id == SPI_SELECT_1)
+	{
+		GPIO_SetBits(SPI3_SS1_PIN_GROUP, SPI3_SS1_PIN);
+		GPIO_ResetBits(SPI3_SS_PIN_GROUP, SPI3_SS_PIN);
+	}
+	else if (spi_id == SPI_SELECT_2)
+	{
+		GPIO_SetBits(SPI3_SS_PIN_GROUP, SPI3_SS_PIN);
+		GPIO_ResetBits(SPI3_SS1_PIN_GROUP, SPI3_SS1_PIN);
+
+	}
+}
+
+void  spi_driver_select_init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	/* GPIOG Peripheral clock enable */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	/* GPIOG Peripheral clock enable */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	/* Configure PG6 and PG8 in output pushpull mode */
+	GPIO_InitStructure.GPIO_Pin = SPI3_SS_PIN | SPI3_SS1_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOG, &GPIO_InitStructure);
+}
 #ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
