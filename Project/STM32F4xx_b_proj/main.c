@@ -27,7 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "main_usart.h"
+#include "usart_driver.h"
 /** @addtogroup Template_Project
   * @{
   */
@@ -59,7 +59,8 @@ int main(void)
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
 
-  main_usart_init();
+  usart_driver_init();
+  spix_driver_init();
 
   /* SysTick end of count event each 10ms */
   RCC_GetClocksFreq(&RCC_Clocks);

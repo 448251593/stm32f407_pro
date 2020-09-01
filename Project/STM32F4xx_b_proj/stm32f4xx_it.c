@@ -143,6 +143,7 @@ void SysTick_Handler(void)
 {
 	TimingDelay_Decrement();
 	systick_call_usart();
+	spix_decrement();
 }
 
 /******************************************************************************/
@@ -159,6 +160,15 @@ void SysTick_Handler(void)
 void USARTx_IRQHandler(void)
 {
 	data_recv_usart();
+}
+/**
+  * @brief  This function handles SPI interrupt request.
+  * @param  None
+  * @retval None
+  */
+void SPIx_IRQHANDLER(void)
+{
+	spix_driver_irqhandler();
 }
 /**
   * @brief  This function handles PPP interrupt request.

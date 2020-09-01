@@ -415,9 +415,14 @@
           <GroupName>pro_src</GroupName>
           <Files>
             <File>
-              <FileName>main_usart.c</FileName>
+              <FileName>spi_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\pro_src\main_usart.c</FilePath>
+              <FilePath>..\pro_src\spi_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_driver.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1701,9 +1706,14 @@
           <GroupName>pro_src</GroupName>
           <Files>
             <File>
-              <FileName>main_usart.c</FileName>
+              <FileName>spi_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\pro_src\main_usart.c</FilePath>
+              <FilePath>..\pro_src\spi_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_driver.c</FilePath>
             </File>
           </Files>
         </Group>
