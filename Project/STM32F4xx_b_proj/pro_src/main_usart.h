@@ -26,8 +26,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __MAIN_USART_H
+#define __MAIN_USART_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -134,6 +134,7 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+extern int main_usart_init(void);
 #ifdef __cplusplus
 }
 #endif
