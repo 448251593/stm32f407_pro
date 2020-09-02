@@ -415,11 +415,6 @@
           <GroupName>pro_src</GroupName>
           <Files>
             <File>
-              <FileName>spi_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_driver.c</FilePath>
-            </File>
-            <File>
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\usart_driver.c</FilePath>
@@ -428,6 +423,11 @@
               <FileName>spi_flash_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_flash_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_net_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_driver.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1741,11 +1741,6 @@
           <GroupName>pro_src</GroupName>
           <Files>
             <File>
-              <FileName>spi_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_driver.c</FilePath>
-            </File>
-            <File>
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\usart_driver.c</FilePath>
@@ -1754,6 +1749,11 @@
               <FileName>spi_flash_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_flash_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_net_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_driver.c</FilePath>
             </File>
           </Files>
         </Group>

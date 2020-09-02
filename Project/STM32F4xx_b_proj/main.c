@@ -28,7 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usart_driver.h"
-#include "spi_driver.h"
+#include "spi_net_driver.h"
 /** @addtogroup Template_Project
   * @{
   */
@@ -61,7 +61,7 @@ int main(void)
        refer to system_stm32f4xx.c file */
 
   usart_driver_init();
-  spix_driver_init();
+
 
   /* SysTick end of count event each 10ms */
   RCC_GetClocksFreq(&RCC_Clocks);

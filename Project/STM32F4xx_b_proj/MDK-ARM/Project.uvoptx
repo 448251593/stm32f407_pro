@@ -407,8 +407,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_driver.c</PathWithFileName>
-      <FilenameWithoutPath>spi_driver.c</FilenameWithoutPath>
+      <PathWithFileName>..\pro_src\usart_driver.c</PathWithFileName>
+      <FilenameWithoutPath>usart_driver.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -419,8 +419,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\usart_driver.c</PathWithFileName>
-      <FilenameWithoutPath>usart_driver.c</FilenameWithoutPath>
+      <PathWithFileName>..\pro_src\spi_flash_driver.c</PathWithFileName>
+      <FilenameWithoutPath>spi_flash_driver.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -431,8 +431,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_flash_driver.c</PathWithFileName>
-      <FilenameWithoutPath>spi_flash_driver.c</FilenameWithoutPath>
+      <PathWithFileName>..\pro_src\spi_net_driver.c</PathWithFileName>
+      <FilenameWithoutPath>spi_net_driver.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -472,7 +472,7 @@
 
   <Group>
     <GroupName>spi_net</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

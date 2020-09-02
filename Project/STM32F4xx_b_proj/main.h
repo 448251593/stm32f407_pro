@@ -31,7 +31,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
-#include "spi_driver.h"
+#include "spi_net_driver.h"
 #include "usart_driver.h"
 #define countof(a)   (sizeof(a) / sizeof(*(a)))
 typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
