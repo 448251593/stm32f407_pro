@@ -335,7 +335,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40_41xxx,USE_STM324xG_EVAL</Define>
               <Undefine></Undefine>
-              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src</IncludePath>
+              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src;..\pro_src\spi_flash;..\pro_src\spi_net</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -423,6 +423,41 @@
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\usart_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_flash_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash_driver.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>spi_flash</GroupName>
+          <Files>
+            <File>
+              <FileName>Mx25L6406e.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash\Mx25L6406e.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mx25L6406e_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash\Mx25L6406e_cmd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>spi_net</GroupName>
+          <Files>
+            <File>
+              <FileName>socket.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net\socket.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net\w5500.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1714,6 +1749,41 @@
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\usart_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi_flash_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash_driver.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>spi_flash</GroupName>
+          <Files>
+            <File>
+              <FileName>Mx25L6406e.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash\Mx25L6406e.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mx25L6406e_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_flash\Mx25L6406e_cmd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>spi_net</GroupName>
+          <Files>
+            <File>
+              <FileName>socket.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net\socket.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net\w5500.c</FilePath>
             </File>
           </Files>
         </Group>

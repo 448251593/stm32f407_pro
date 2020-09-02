@@ -135,6 +135,8 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 extern int usart_driver_init(void);
+void   systick_call_usart(void);
+void  data_recv_usart(void);
 #ifdef __cplusplus
 }
 #endif

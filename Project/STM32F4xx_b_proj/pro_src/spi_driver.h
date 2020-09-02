@@ -66,28 +66,28 @@
 /* SPIx Communication boards Interface */
 // #if 1 //defined (USE_STM324xG_EVAL)
   #define SPIx                           SPI3 //add by bcg,2020-09-01 11:52:05
-  #define SPIx_CLK                       RCC_APB1Periph_SPI2
+  #define SPIx_CLK                       RCC_APB1Periph_SPI3
   #define SPIx_CLK_INIT                  RCC_APB1PeriphClockCmd
-  #define SPIx_IRQn                      SPI2_IRQn
-  #define SPIx_IRQHANDLER                SPI2_IRQHandler
+  #define SPIx_IRQn                      SPI3_IRQn
+  #define SPIx_IRQHANDLER                SPI3_IRQHandler
 
   #define SPIx_SCK_PIN                   GPIO_Pin_10
   #define SPIx_SCK_GPIO_PORT             GPIOC//GPIOI
-  #define SPIx_SCK_GPIO_CLK              RCC_AHB1Periph_GPIOI
-  #define SPIx_SCK_SOURCE                GPIO_PinSource1
-  #define SPIx_SCK_AF                    GPIO_AF_SPI2
+  #define SPIx_SCK_GPIO_CLK              RCC_AHB1Periph_GPIOC
+  #define SPIx_SCK_SOURCE                GPIO_PinSource10
+  #define SPIx_SCK_AF                    GPIO_AF_SPI3
 
   #define SPIx_MISO_PIN                  GPIO_Pin_11
   #define SPIx_MISO_GPIO_PORT            GPIOC//GPIOI
-  #define SPIx_MISO_GPIO_CLK             RCC_AHB1Periph_GPIOI
-  #define SPIx_MISO_SOURCE               GPIO_PinSource2
-  #define SPIx_MISO_AF                   GPIO_AF_SPI2
+  #define SPIx_MISO_GPIO_CLK             RCC_AHB1Periph_GPIOC
+  #define SPIx_MISO_SOURCE               GPIO_PinSource11
+  #define SPIx_MISO_AF                   GPIO_AF_SPI3
 
   #define SPIx_MOSI_PIN                  GPIO_Pin_12
   #define SPIx_MOSI_GPIO_PORT            GPIOC//GPIOI
-  #define SPIx_MOSI_GPIO_CLK             RCC_AHB1Periph_GPIOI
-  #define SPIx_MOSI_SOURCE               GPIO_PinSource3
-  #define SPIx_MOSI_AF                   GPIO_AF_SPI2
+  #define SPIx_MOSI_GPIO_CLK             RCC_AHB1Periph_GPIOC
+  #define SPIx_MOSI_SOURCE               GPIO_PinSource12
+  #define SPIx_MOSI_AF                   GPIO_AF_SPI3
 
 // #endif  /* USE_STM324xG_EVAL */
 

@@ -45,6 +45,7 @@ __IO uint8_t spi_aRxBuffer [BUFFERSIZE];
 __IO uint8_t spi_ubRxIndex = 0;
 __IO uint8_t spi_ubTxIndex = 0;
 __IO uint32_t spi_TimeOut = 0;
+
 // extern  __IO uint8_t spi_aRxBuffer[];
 // extern __IO uint8_t spi_ubRxIndex;
 // extern __IO uint8_t spi_ubTxIndex;
@@ -52,10 +53,10 @@ __IO uint32_t spi_TimeOut = 0;
 // extern __IO uint32_t spi_TimeOut;
 __IO uint8_t spi_ubCounter = 0;
 SPI_InitTypeDef  SPI_InitStructure;
-void  spi_driver_select_init(void);
+void  spi_driver_select_gpio_init(void);
 /* Private function prototypes -----------------------------------------------*/
 static void SPI_Config(void);
-
+void    spix_recv_data_end_event(uint8_t *pdt, uint16_t  len);
 //static TestStatus Buffercmp(uint8_t* pBuffer1, __IO uint8_t* pBuffer2, uint16_t BufferLength);
 
 /* Private functions ---------------------------------------------------------*/
@@ -75,7 +76,7 @@ int spix_driver_init(void)
 
   /* SPI configuration */
   	SPI_Config();
-	spi_driver_select_init();
+	spi_driver_select_gpio_init();
   /* SysTick configuration */
 //   SysTickConfig();
 
@@ -285,9 +286,11 @@ void spix_decrement(void)
     // STM_EVAL_LEDToggle(LED1);
   }
 }
+
 //add by bcg,2020-09-01 10:50:27
 void spix_driver_irqhandler(void)
 {
+  //add by bcg,2020-09-01 19:26:42 --spi3
 	/* SPI in Receiver mode */
 	if (SPI_I2S_GetITStatus(SPIx, SPI_I2S_IT_RXNE) == SET)
 	{
@@ -295,11 +298,15 @@ void spix_driver_irqhandler(void)
 		{
 			/* Receive Transaction data */
 			spi_aRxBuffer[spi_ubRxIndex++] = SPI_I2S_ReceiveData(SPIx);
+			//spix_recv_data_end_event(spi_aRxBuffer, spi_ubRxIndex);
 		}
 		else
 		{
 			/* Disable the Rx buffer not empty interrupt */
 			SPI_I2S_ITConfig(SPIx, SPI_I2S_IT_RXNE, DISABLE);
+			//spix_recv_data_end_event(spi_aRxBuffer, spi_ubRxIndex);
+			spi_ubRxIndex = 0;
+			SPI_I2S_ITConfig(SPIx, SPI_I2S_IT_RXNE, ENABLE);
 		}
 	}
 	/* SPI in Transmitter mode */
@@ -318,7 +325,7 @@ void spix_driver_irqhandler(void)
 	}
 }
 
-//add by bcg,2020-09-01 11:54:53
+//add by bcg,2020-09-01 11:54:53 spi_片选接口
 void   spi_driver_select(uint8_t spi_id)
 {
 	if (spi_id == SPI_SELECT_1)
@@ -333,8 +340,8 @@ void   spi_driver_select(uint8_t spi_id)
 
 	}
 }
-
-void  spi_driver_select_init(void)
+//add by bcg,2020-09-01 19:42:49 spi 片选 gpio init
+void  spi_driver_select_gpio_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	/* GPIOG Peripheral clock enable */
@@ -350,6 +357,23 @@ void  spi_driver_select_init(void)
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOG, &GPIO_InitStructure);
 }
+
+
+
+void    spix_send_data(uint8_t *pdt, uint16_t  len)
+{
+	memcpy(spi_aTxBuffer, pdt, BUFFERSIZE < len ? BUFFERSIZE : len);
+	spi_ubTxIndex = 0;
+	SPI_I2S_ITConfig(SPIx, SPI_I2S_IT_TXE, ENABLE);
+}
+//add by bcg,2020-09-01 19:52:00  接收spix数据处理
+void    spix_recv_data_end_event(uint8_t *pdt, uint16_t  len)
+{
+
+}
+
+
+
 #ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
