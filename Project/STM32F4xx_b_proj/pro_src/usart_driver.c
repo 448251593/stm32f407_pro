@@ -40,8 +40,9 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t usart_aTxBuffer[BUFFERSIZE] = "USART Interrupt Example: Communication between two USART using Interrupt";
+uint8_t usart_aTxBuffer[BUFFERSIZE] = "USART DMA Example: Communication between two USART using DMA";
 uint8_t usart_aRxBuffer [BUFFERSIZE];
+
 __IO uint8_t usart_ubRxIndex = 0x00;
 __IO uint8_t usart_ubTxIndex = 0x00;
 __IO uint32_t TimeOut = 0x00;
@@ -80,41 +81,52 @@ int usart_driver_init(void)
  // STM_EVAL_LEDInit(LED2);
  // STM_EVAL_LEDInit(LED3);
 
-//#ifdef 1//USART_TRANSMITTER
+
+// #ifdef USART_TRANSMITTER
 
   /* Tamper Button Configuration ---------------------------------------------*/
   //STM_EVAL_PBInit(BUTTON_TAMPER,BUTTON_MODE_GPIO);
 
+  /* Enable DMA USART TX Stream */
+  DMA_Cmd(USARTx_TX_DMA_STREAM,ENABLE);
+
   /* Wait until Tamper Button is pressed */
-  //while (STM_EVAL_PBGetState(BUTTON_TAMPER));
+//  while (STM_EVAL_PBGetState(BUTTON_TAMPER));
 
-  /* Enable the Tx buffer empty interrupt */
-  USART_ITConfig(USARTx, USART_IT_TXE, ENABLE);
-
-//#endif /* USART_TRANSMITTER */
-//
-//#ifdef 1//USART_RECEIVER
-
-  /* Enable the Tx buffer empty interrupt */
-  USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);
+  /* Enable USART DMA TX Requsts */
+  USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
 
   /* Waiting the end of Data transfer */
-  while ((usart_ubTxIndex < BUFFERSIZE) && (usart_ubRxIndex < BUFFERSIZE))
-  {
-  }
+  while (USART_GetFlagStatus(USARTx,USART_FLAG_TC)==RESET);
+  while (DMA_GetFlagStatus(USARTx_TX_DMA_STREAM,USARTx_TX_DMA_FLAG_TCIF)==RESET);
 
-  //if (Buffercmp(usart_aTxBuffer, usart_aRxBuffer, BUFFERSIZE) != FAILED)
-  //{
-  //  /* Turn ON LED2 */
-  //  STM_EVAL_LEDOn(LED2);
-  //}
-  //else
-  //{
-  //  /* Turn ON LED3 */
-  //  STM_EVAL_LEDOn(LED3);
-  //}
+  /* Clear DMA Transfer Complete Flags */
+  DMA_ClearFlag(USARTx_TX_DMA_STREAM,USARTx_TX_DMA_FLAG_TCIF);
+  /* Clear USART Transfer Complete Flags */
+  USART_ClearFlag(USARTx,USART_FLAG_TC);
 
-//#endif /* USART_RECEIVER */
+// #endif /* USART_TRANSMITTER */
+
+// #ifdef USART_RECEIVER
+
+  /* Enable DMA USART RX Stream */
+//   DMA_Cmd(USARTx_RX_DMA_STREAM,ENABLE);
+
+//   /* Enable USART DMA RX Requsts */
+//   USART_DMACmd(USARTx, USART_DMAReq_Rx, ENABLE);
+
+//   /* Waiting the end of Data transfer */
+//   while (USART_GetFlagStatus(USARTx,USART_FLAG_TC)==RESET);
+//   while (DMA_GetFlagStatus(USARTx_RX_DMA_STREAM,USARTx_RX_DMA_FLAG_TCIF)==RESET);
+
+//   /* Clear DMA Transfer Complete Flags */
+//   DMA_ClearFlag(USARTx_RX_DMA_STREAM,USARTx_RX_DMA_FLAG_TCIF);
+//   /* Clear USART Transfer Complete Flags */
+//   USART_ClearFlag(USARTx,USART_FLAG_TC);
+
+
+
+// #endif /* USART_RECEIVER */
 
   //while (1)
   //{
@@ -129,36 +141,42 @@ int usart_driver_init(void)
   */
 static void USART_Config(void)
 {
-  USART_InitTypeDef USART_InitStructure;
-  NVIC_InitTypeDef NVIC_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+	DMA_InitTypeDef  DMA_InitStructure;
+	
+	/* Peripheral Clock Enable -------------------------------------------------*/
+	/* Enable GPIO clock */
+	RCC_AHB1PeriphClockCmd(USARTx_TX_GPIO_CLK | USARTx_RX_GPIO_CLK, ENABLE);
 
-  /* Enable GPIO clock */
-  RCC_AHB1PeriphClockCmd(USARTx_TX_GPIO_CLK | USARTx_RX_GPIO_CLK, ENABLE);
+	/* Enable USART clock */
+	USARTx_CLK_INIT(USARTx_CLK, ENABLE);
 
-  /* Enable USART clock */
-  USARTx_CLK_INIT(USARTx_CLK, ENABLE);
+	/* Enable the DMA clock */
+	RCC_AHB1PeriphClockCmd(USARTx_DMAx_CLK, ENABLE);
 
-  /* Connect USART pins to AF7 */
-  GPIO_PinAFConfig(USARTx_TX_GPIO_PORT, USARTx_TX_SOURCE, USARTx_TX_AF);
-  GPIO_PinAFConfig(USARTx_RX_GPIO_PORT, USARTx_RX_SOURCE, USARTx_RX_AF);
+	/* USARTx GPIO configuration -----------------------------------------------*/
+	/* Connect USART pins to AF7 */
+	GPIO_PinAFConfig(USARTx_TX_GPIO_PORT, USARTx_TX_SOURCE, USARTx_TX_AF);
+	GPIO_PinAFConfig(USARTx_RX_GPIO_PORT, USARTx_RX_SOURCE, USARTx_RX_AF);
 
-  /* Configure USART Tx and Rx as alternate function push-pull */
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_InitStructure.GPIO_Pin = USARTx_TX_PIN;
-  GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
+	/* Configure USART Tx and Rx as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
-  GPIO_InitStructure.GPIO_Pin = USARTx_RX_PIN;
-  GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = USARTx_TX_PIN;
+	GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStructure);
 
-  /* Enable the USART OverSampling by 8 */
-  USART_OverSampling8Cmd(USARTx, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = USARTx_RX_PIN;
+	GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStructure);
 
-  /* USARTx configuration ----------------------------------------------------*/
-  /* USARTx configured as follows:
+	/* USARTx configuration ----------------------------------------------------*/
+	/* Enable the USART OverSampling by 8 */
+	USART_OverSampling8Cmd(USARTx, ENABLE);
+
+	/* USARTx configured as follows:
         - BaudRate = 5250000 baud
 		   - Maximum BaudRate that can be achieved when using the Oversampling by 8
 		     is: (USART APB Clock / 8)
@@ -175,27 +193,43 @@ static void USART_Config(void)
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */
-  USART_InitStructure.USART_BaudRate = 5250000;
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-  USART_Init(USARTx, &USART_InitStructure);
+	USART_InitStructure.USART_BaudRate = 5250000;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	/* When using Parity the word length must be configured to 9 bits */
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	USART_Init(USARTx, &USART_InitStructure);
 
-  /* NVIC configuration */
-  /* Configure the Priority Group to 2 bits */
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	/* Configure DMA controller to manage USART TX and RX DMA request ----------*/
 
-  /* Enable the USARTx Interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = USARTx_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+	/* Configure DMA Initialization Structure */
+	DMA_InitStructure.DMA_BufferSize = BUFFERSIZE;
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(USARTx->DR));
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	/* Configure TX DMA */
+	DMA_InitStructure.DMA_Channel = USARTx_TX_DMA_CHANNEL;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)usart_aTxBuffer;
+	DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
+	/* Configure RX DMA */
+	DMA_InitStructure.DMA_Channel = USARTx_RX_DMA_CHANNEL;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)usart_aRxBuffer;
+	DMA_Init(USARTx_RX_DMA_STREAM, &DMA_InitStructure);
 
-  /* Enable USART */
-  USART_Cmd(USARTx, ENABLE);
+	/* Enable USART */
+	USART_Cmd(USARTx, ENABLE);
 }
 #if 0
 /**

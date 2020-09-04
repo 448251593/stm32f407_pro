@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    USART/USART_TwoBoards/USART_DataExchangeInterrupt/main.h
+  * @file    USART/USART_TwoBoards/USART_DataExchangeDMA/main.h
   * @author  MCD Application Team
   * @version V1.8.0
   * @date    04-November-2016
@@ -49,94 +49,77 @@
  #error "Please select first the Evaluation board used in your application (in Project Options)"
 #endif
 
-/* Exported typedef -----------------------------------------------------------*/
-// #define countof(a)   (sizeof(a) / sizeof(*(a)))
-// typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
+/* Exported typedef ----------------------------------------------------------*/
+//typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
-/* Exported define ------------------------------------------------------------*/
-
+/* Exported define -----------------------------------------------------------*/
 /* Uncomment the line below if you will use the USART in Transmitter Mode */
 /* #define USART_TRANSMITTER */
 /* Uncomment the line below if you will use the USART in Receiver Mode */
- #define USART_RECEIVER
+#define USART_RECEIVER
 
-/* Definition for USARTx resources ********************************************/
-//#if defined (USE_STM324xG_EVAL)
 
-#define USARTx                           USART3
-#define USARTx_CLK                       RCC_APB1Periph_USART3
-#define USARTx_CLK_INIT                  RCC_APB1PeriphClockCmd
-#define USARTx_IRQn                      USART3_IRQn
-#define USARTx_IRQHandler                USART3_IRQHandler
 
-#define USARTx_TX_PIN                    GPIO_Pin_10
-#define USARTx_TX_GPIO_PORT              GPIOB//GPIOC //add by bcg,2020-09-01 11:47:03
-#define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
-#define USARTx_TX_SOURCE                 GPIO_PinSource10
-#define USARTx_TX_AF                     GPIO_AF_USART3
+// #if defined (USE_STM324x7I_EVAL)
 
-#define USARTx_RX_PIN                    GPIO_Pin_11
-#define USARTx_RX_GPIO_PORT              GPIOB//GPIOC
-#define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
-#define USARTx_RX_SOURCE                 GPIO_PinSource11
-#define USARTx_RX_AF                     GPIO_AF_USART3
+  /* Definition for USARTx resources ******************************************/
+  #define USARTx                           USART3
+  #define USARTx_CLK                       RCC_APB1Periph_USART3
+  #define USARTx_CLK_INIT                  RCC_APB1PeriphClockCmd
+  #define USARTx_IRQn                      USART3_IRQn
+  #define USARTx_IRQHandler                USART3_IRQHandler
 
-//#endif /* USE_STM324xG_EVAL */
+  #define USARTx_TX_PIN                    GPIO_Pin_10
+  #define USARTx_TX_GPIO_PORT              GPIOC
+  #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
+  #define USARTx_TX_SOURCE                 GPIO_PinSource10
+  #define USARTx_TX_AF                     GPIO_AF_USART3
 
-//#if defined (USE_STM324x7I_EVAL)
+  #define USARTx_RX_PIN                    GPIO_Pin_11
+  #define USARTx_RX_GPIO_PORT              GPIOC
+  #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
+  #define USARTx_RX_SOURCE                 GPIO_PinSource11
+  #define USARTx_RX_AF                     GPIO_AF_USART3
 
-//#define USARTx                           USART3
-//#define USARTx_CLK                       RCC_APB1Periph_USART3
-//#define USARTx_CLK_INIT                  RCC_APB1PeriphClockCmd
-//#define USARTx_IRQn                      USART3_IRQn
-//#define USARTx_IRQHandler                USART3_IRQHandler
+  /* Definition for DMAx resources ********************************************/
+  #define USARTx_DR_ADDRESS                ((uint32_t)USART3 + 0x04)
 
-//#define USARTx_TX_PIN                    GPIO_Pin_10
-//#define USARTx_TX_GPIO_PORT              GPIOC
-//#define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
-//#define USARTx_TX_SOURCE                 GPIO_PinSource10
-//#define USARTx_TX_AF                     GPIO_AF_USART3
+  #define USARTx_DMA                       DMA1
+  #define USARTx_DMAx_CLK                  RCC_AHB1Periph_DMA1
 
-//#define USARTx_RX_PIN                    GPIO_Pin_11
-//#define USARTx_RX_GPIO_PORT              GPIOC
-//#define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
-//#define USARTx_RX_SOURCE                 GPIO_PinSource11
-//#define USARTx_RX_AF                     GPIO_AF_USART3
+  #define USARTx_TX_DMA_CHANNEL            DMA_Channel_4
+  #define USARTx_TX_DMA_STREAM             DMA1_Stream3
+  #define USARTx_TX_DMA_FLAG_FEIF          DMA_FLAG_FEIF3
+  #define USARTx_TX_DMA_FLAG_DMEIF         DMA_FLAG_DMEIF3
+  #define USARTx_TX_DMA_FLAG_TEIF          DMA_FLAG_TEIF3
+  #define USARTx_TX_DMA_FLAG_HTIF          DMA_FLAG_HTIF3
+  #define USARTx_TX_DMA_FLAG_TCIF          DMA_FLAG_TCIF3
 
-//#endif /* USE_STM324x7I_EVAL */
+  #define USARTx_RX_DMA_CHANNEL            DMA_Channel_4
+  #define USARTx_RX_DMA_STREAM             DMA1_Stream1
+  #define USARTx_RX_DMA_FLAG_FEIF          DMA_FLAG_FEIF1
+  #define USARTx_RX_DMA_FLAG_DMEIF         DMA_FLAG_DMEIF1
+  #define USARTx_RX_DMA_FLAG_TEIF          DMA_FLAG_TEIF1
+  #define USARTx_RX_DMA_FLAG_HTIF          DMA_FLAG_HTIF1
+  #define USARTx_RX_DMA_FLAG_TCIF          DMA_FLAG_TCIF1
 
-//#if defined (USE_STM324x9I_EVAL)
+  #define USARTx_DMA_TX_IRQn               DMA1_Stream3_IRQn
+  #define USARTx_DMA_RX_IRQn               DMA1_Stream1_IRQn
+  #define USARTx_DMA_TX_IRQHandler         DMA1_Stream3_IRQHandler
+  #define USARTx_DMA_RX_IRQHandler         DMA1_Stream1_IRQHandler
 
-//#define USARTx                           USART1
-//#define USARTx_CLK                       RCC_APB2Periph_USART1
-//#define USARTx_CLK_INIT                  RCC_APB2PeriphClockCmd
-//#define USARTx_IRQn                      USART1_IRQn
-//#define USARTx_IRQHandler                USART1_IRQHandler
+// #endif /* USE_STM324x7I_EVAL */
 
-//#define USARTx_TX_PIN                    GPIO_Pin_9
-//#define USARTx_TX_GPIO_PORT              GPIOA
-//#define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOA
-//#define USARTx_TX_SOURCE                 GPIO_PinSource9
-//#define USARTx_TX_AF                     GPIO_AF_USART1
-
-//#define USARTx_RX_PIN                    GPIO_Pin_10
-//#define USARTx_RX_GPIO_PORT              GPIOA
-//#define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOA
-//#define USARTx_RX_SOURCE                 GPIO_PinSource10
-//#define USARTx_RX_AF                     GPIO_AF_USART1
-
-//#endif /* USE_STM324x9I_EVAL */
-
-#define BUFFERSIZE                     100
 
 /* Misc definition ************************************************************/
+/* Transmit buffer size */
+#define BUFFERSIZE                       100
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-extern int usart_driver_init(void);
-void   systick_call_usart(void);
-void  data_recv_usart(void);
+
 #ifdef __cplusplus
 }
 #endif
