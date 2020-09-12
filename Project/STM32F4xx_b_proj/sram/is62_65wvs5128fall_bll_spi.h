@@ -9,7 +9,7 @@
 
 #define     IS62_65WVS5128_DIE0_START_ADDR          0x0
 #define     IS62_65WVS5128_DIE0_END_ADDR            0x3ffff
-#define     IS62_65WVS5128_DIE1_START_ADDR          0x4ffff
+#define     IS62_65WVS5128_DIE1_START_ADDR          0x40000
 #define     IS62_65WVS5128_DIE1_END_ADDR            0x7ffff
 
 #define     IS62_65WVS5128_CMD_READ           0x03 //add by bcg,2020-09-11 15:50:53 Read data to memory array beginning at selected address
@@ -33,6 +33,11 @@ typedef enum
    IS62_65WVS5128_OPERAT_MODE_SEQU = 0x02,  //Sequential mode (default operation)
    IS62_65WVS5128_OPERAT_MODE_RESE = 0x03,  //Reserved
 }IS62_OPERATE_MODE_ENUM;
+
+
+
+#define   IS62_65WVS5128_READ_BYTE    1
+#define   IS62_65WVS5128_WRITE_BYTE    0
 
 
 #endif
