@@ -142,7 +142,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
 	TimingDelay_Decrement();
-	systick_call_usart();
+	usart3_SysTick_Handler();
 	//spix_decrement();
 }
 
@@ -159,7 +159,8 @@ void SysTick_Handler(void)
 */
 void USARTx_IRQHandler(void)
 {
-	data_recv_usart();
+	// data_recv_usart();
+  USART3_IRQHandler_deal();
 }
 /**
   * @brief  This function handles SPI interrupt request.

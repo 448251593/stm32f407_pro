@@ -102,357 +102,21 @@ void sADC_Init(void)
   sADC_CS_HIGH();
 
   /*!< SPI configuration */
-  SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Rx;//add by bcg,2020-09-02 15:44:41 only read
+  SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;//SPI_Direction_1Line_Rx;//add by bcg,2020-09-02 15:44:41 only read
   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-  SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+  SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
   SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
-  SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
+  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
   SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
 
-  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;//SPI_FirstBit_LSB;//SPI_FirstBit_MSB;
   SPI_InitStructure.SPI_CRCPolynomial = 7;
   SPI_Init(sADC_SPI, &SPI_InitStructure);
 
   /*!< Enable the sADC_SPI  */
   SPI_Cmd(sADC_SPI, ENABLE);
 }
-#if 0
-/**
-  * @brief  Erases the specified NET sector.
-  * @param  SectorAddr: address of the sector to erase.
-  * @retval None
-  */
-void sADC_EraseSector(uint32_t SectorAddr)
-{
-  /*!< Send write enable instruction */
-  sADC_WriteEnable();
-
-  /*!< Sector Erase */
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-  /*!< Send Sector Erase instruction */
-  sADC_SendByte(sADC_CMD_SE);
-  /*!< Send SectorAddr high nibble address byte */
-  sADC_SendByte((SectorAddr & 0xFF0000) >> 16);
-  /*!< Send SectorAddr medium nibble address byte */
-  sADC_SendByte((SectorAddr & 0xFF00) >> 8);
-  /*!< Send SectorAddr low nibble address byte */
-  sADC_SendByte(SectorAddr & 0xFF);
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-
-  /*!< Wait the end of NET writing */
-  sADC_WaitForWriteEnd();
-}
-
-/**
-  * @brief  Erases the entire NET.
-  * @param  None
-  * @retval None
-  */
-void sADC_EraseBulk(void)
-{
-  /*!< Send write enable instruction */
-  sADC_WriteEnable();
-
-  /*!< Bulk Erase */
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-  /*!< Send Bulk Erase instruction  */
-  sADC_SendByte(sADC_CMD_BE);
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-
-  /*!< Wait the end of NET writing */
-  sADC_WaitForWriteEnd();
-}
-
-/**
-  * @brief  Writes more than one byte to the NET with a single WRITE cycle
-  *         (Page WRITE sequence).
-  * @note   The number of byte can't exceed the NET page size.
-  * @param  pBuffer: pointer to the buffer  containing the data to be written
-  *         to the NET.
-  * @param  WriteAddr: NET's internal address to write to.
-  * @param  NumByteToWrite: number of bytes to write to the NET, must be equal
-  *         or less than "sADC_PAGESIZE" value.
-  * @retval None
-  */
-void sADC_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
-{
-  /*!< Enable the write access to the NET */
-  sADC_WriteEnable();
-
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-  /*!< Send "Write to Memory " instruction */
-  sADC_SendByte(sADC_CMD_WRITE);
-  /*!< Send WriteAddr high nibble address byte to write to */
-  sADC_SendByte((WriteAddr & 0xFF0000) >> 16);
-  /*!< Send WriteAddr medium nibble address byte to write to */
-  sADC_SendByte((WriteAddr & 0xFF00) >> 8);
-  /*!< Send WriteAddr low nibble address byte to write to */
-  sADC_SendByte(WriteAddr & 0xFF);
-
-  /*!< while there is data to be written on the NET */
-  while (NumByteToWrite--)
-  {
-    /*!< Send the current byte */
-    sADC_SendByte(*pBuffer);
-    /*!< Point on the next byte to be written */
-    pBuffer++;
-  }
-
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-
-  /*!< Wait the end of NET writing */
-  sADC_WaitForWriteEnd();
-}
-
-/**
-  * @brief  Writes block of data to the NET. In this function, the number of
-  *         WRITE cycles are reduced, using Page WRITE sequence.
-  * @param  pBuffer: pointer to the buffer  containing the data to be written
-  *         to the NET.
-  * @param  WriteAddr: NET's internal address to write to.
-  * @param  NumByteToWrite: number of bytes to write to the NET.
-  * @retval None
-  */
-void sADC_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
-{
-  uint8_t NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
-
-  Addr = WriteAddr % sADC_SPI_PAGESIZE;
-  count = sADC_SPI_PAGESIZE - Addr;
-  NumOfPage =  NumByteToWrite / sADC_SPI_PAGESIZE;
-  NumOfSingle = NumByteToWrite % sADC_SPI_PAGESIZE;
-
-  if (Addr == 0) /*!< WriteAddr is sADC_PAGESIZE aligned  */
-  {
-    if (NumOfPage == 0) /*!< NumByteToWrite < sADC_PAGESIZE */
-    {
-      sADC_WritePage(pBuffer, WriteAddr, NumByteToWrite);
-    }
-    else /*!< NumByteToWrite > sADC_PAGESIZE */
-    {
-      while (NumOfPage--)
-      {
-        sADC_WritePage(pBuffer, WriteAddr, sADC_SPI_PAGESIZE);
-        WriteAddr +=  sADC_SPI_PAGESIZE;
-        pBuffer += sADC_SPI_PAGESIZE;
-      }
-
-      sADC_WritePage(pBuffer, WriteAddr, NumOfSingle);
-    }
-  }
-  else /*!< WriteAddr is not sADC_PAGESIZE aligned  */
-  {
-    if (NumOfPage == 0) /*!< NumByteToWrite < sADC_PAGESIZE */
-    {
-      if (NumOfSingle > count) /*!< (NumByteToWrite + WriteAddr) > sADC_PAGESIZE */
-      {
-        temp = NumOfSingle - count;
-
-        sADC_WritePage(pBuffer, WriteAddr, count);
-        WriteAddr +=  count;
-        pBuffer += count;
-
-        sADC_WritePage(pBuffer, WriteAddr, temp);
-      }
-      else
-      {
-        sADC_WritePage(pBuffer, WriteAddr, NumByteToWrite);
-      }
-    }
-    else /*!< NumByteToWrite > sADC_PAGESIZE */
-    {
-      NumByteToWrite -= count;
-      NumOfPage =  NumByteToWrite / sADC_SPI_PAGESIZE;
-      NumOfSingle = NumByteToWrite % sADC_SPI_PAGESIZE;
-
-      sADC_WritePage(pBuffer, WriteAddr, count);
-      WriteAddr +=  count;
-      pBuffer += count;
-
-      while (NumOfPage--)
-      {
-        sADC_WritePage(pBuffer, WriteAddr, sADC_SPI_PAGESIZE);
-        WriteAddr +=  sADC_SPI_PAGESIZE;
-        pBuffer += sADC_SPI_PAGESIZE;
-      }
-
-      if (NumOfSingle != 0)
-      {
-        sADC_WritePage(pBuffer, WriteAddr, NumOfSingle);
-      }
-    }
-  }
-}
-
-/**
-  * @brief  Reads a block of data from the NET.
-  * @param  pBuffer: pointer to the buffer that receives the data read from the NET.
-  * @param  ReadAddr: NET's internal address to read from.
-  * @param  NumByteToRead: number of bytes to read from the NET.--ok
-  * @retval None
-  */
-void sADC_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead)
-{
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-
-  /*!< Send "Read from Memory " instruction */
-  sADC_SendByte(sADC_CMD_READ);
-
-  /*!< Send ReadAddr high nibble address byte to read from */
-  sADC_SendByte((ReadAddr & 0xFF0000) >> 16);
-  /*!< Send ReadAddr medium nibble address byte to read from */
-  sADC_SendByte((ReadAddr& 0xFF00) >> 8);
-  /*!< Send ReadAddr low nibble address byte to read from */
-  sADC_SendByte(ReadAddr & 0xFF);
-
-  while (NumByteToRead--) /*!< while there is data to be read */
-  {
-    /*!< Read a byte from the NET */
-    *pBuffer = sADC_SendByte(sADC_DUMMY_BYTE);
-    /*!< Point to the next location where the byte read will be saved */
-    pBuffer++;
-  }
-
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-}
-
-/**
-  * @brief  Reads NET identification.
-  * @param  None
-  * @retval NET identification
-  */
-uint32_t sADC_ReadID(void)
-{
-  uint32_t Temp = 0, Temp0 = 0, Temp1 = 0, Temp2 = 0;
-
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-
-  /*!< Send "RDID " instruction */
-  sADC_SendByte(0x9F);
-
-  /*!< Read a byte from the NET */
-  Temp0 = sADC_SendByte(sADC_DUMMY_BYTE);
-
-  /*!< Read a byte from the NET */
-  Temp1 = sADC_SendByte(sADC_DUMMY_BYTE);
-
-  /*!< Read a byte from the NET */
-  Temp2 = sADC_SendByte(sADC_DUMMY_BYTE);
-
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-
-  Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
-
-  return Temp;
-}
-
-/**
-  * @brief  Initiates a read data byte (READ) sequence from the NET.
-  *   This is done by driving the /CS line low to select the device, then the READ
-  *   instruction is transmitted followed by 3 bytes address. This function exit
-  *   and keep the /CS line low, so the NET still being selected. With this
-  *   technique the whole content of the NET is read with a single READ instruction.
-  * @param  ReadAddr: NET's internal address to read from.
-  * @retval None
-  */
-void sADC_StartReadSequence(uint32_t ReadAddr)
-{
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-
-  /*!< Send "Read from Memory " instruction */
-  sADC_SendByte(sADC_CMD_READ);
-
-  /*!< Send the 24-bit address of the address to read from -------------------*/
-  /*!< Send ReadAddr high nibble address byte */
-  sADC_SendByte((ReadAddr & 0xFF0000) >> 16);
-  /*!< Send ReadAddr medium nibble address byte */
-  sADC_SendByte((ReadAddr& 0xFF00) >> 8);
-  /*!< Send ReadAddr low nibble address byte */
-  sADC_SendByte(ReadAddr & 0xFF);
-}
-
-
-/**
-  * @brief  Sends a Half Word through the SPI interface and return the Half Word
-  *         received from the SPI bus.
-  * @param  HalfWord: Half Word to send.
-  * @retval The value of the received Half Word.
-  */
-uint16_t sADC_SendHalfWord(uint16_t HalfWord)
-{
-  /*!< Loop while DR register in not empty */
-  while (SPI_I2S_GetFlagStatus(sADC_SPI, SPI_I2S_FLAG_TXE) == RESET);
-
-  /*!< Send Half Word through the sADC peripheral */
-  SPI_I2S_SendData(sADC_SPI, HalfWord);
-
-  /*!< Wait to receive a Half Word */
-  while (SPI_I2S_GetFlagStatus(sADC_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-
-  /*!< Return the Half Word read from the SPI bus */
-  return SPI_I2S_ReceiveData(sADC_SPI);
-}
-
-/**
-  * @brief  Enables the write access to the NET.
-  * @param  None
-  * @retval None
-  */
-void sADC_WriteEnable(void)
-{
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-
-  /*!< Send "Write Enable" instruction */
-  sADC_SendByte(sADC_CMD_WREN);
-
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-}
-
-/**
-  * @brief  Polls the status of the Write In Progress (WIP) flag in the NET's
-  *         status register and loop until write operation has completed.
-  * @param  None
-  * @retval None
-  */
-void sADC_WaitForWriteEnd(void)
-{
-  uint8_t NETstatus = 0;
-
-  /*!< Select the NET: Chip Select low */
-  sADC_CS_LOW();
-
-  /*!< Send "Read Status Register" instruction */
-  sADC_SendByte(sADC_CMD_RDSR);
-
-  /*!< Loop as long as the memory is busy with a write cycle */
-  do
-  {
-    /*!< Send a dummy byte to generate the clock needed by the NET
-    and put the value of the status register in NET_Status variable */
-    NETstatus = sADC_SendByte(sADC_DUMMY_BYTE);
-
-  }
-  while ((NETstatus & sADC_WIP_FLAG) == SET); /* Write in progress */
-
-  /*!< Deselect the NET: Chip Select high */
-  sADC_CS_HIGH();
-}
-#endif
-
 
 /**
   * @brief  Reads a byte from the SPI NET.
@@ -461,9 +125,15 @@ void sADC_WaitForWriteEnd(void)
   * @param  None
   * @retval Byte Read from the SPI NET.--ok
   */
-uint8_t sADC_ReadByte(void)
+uint16_t sADC_ReadByte(void)
 {
-  return (sADC_SendByte(sADC_DUMMY_BYTE));
+	uint16_t t = 0;
+	sADC_CS_LOW();
+	t = sADC_SendByte(sADC_DUMMY_BYTE);
+	sADC_CS_HIGH();
+	sADC_CS_HIGH();
+	
+	return t;
 }
 
 /**
@@ -472,8 +142,9 @@ uint8_t sADC_ReadByte(void)
   * @param  byte: byte to send.
   * @retval The value of the received byte.--ok
   */
-uint8_t sADC_SendByte(uint8_t byte)
+uint16_t sADC_SendByte(uint16_t byte)
 {
+   
   /*!< Loop while DR register in not empty */
   while (SPI_I2S_GetFlagStatus(sADC_SPI, SPI_I2S_FLAG_TXE) == RESET);
 
@@ -544,8 +215,8 @@ void sADC_LowLevel_Init(void)
   GPIO_Init(sADC_SPI_SCK_GPIO_PORT, &GPIO_InitStructure);
 
   /*!< SPI MOSI pin configuration */
-  // GPIO_InitStructure.GPIO_Pin =  sADC_SPI_MOSI_PIN;
-  // GPIO_Init(sADC_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin =  sADC_SPI_MOSI_PIN;
+  GPIO_Init(sADC_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
 
   /*!< SPI MISO pin configuration */
   GPIO_InitStructure.GPIO_Pin =  sADC_SPI_MISO_PIN;
@@ -588,8 +259,8 @@ void sADC_LowLevel_DeInit(void)
   GPIO_InitStructure.GPIO_Pin = sADC_SPI_MISO_PIN;
   GPIO_Init(sADC_SPI_MISO_GPIO_PORT, &GPIO_InitStructure);
 
-  // GPIO_InitStructure.GPIO_Pin = sADC_SPI_MOSI_PIN;
-  // GPIO_Init(sADC_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = sADC_SPI_MOSI_PIN;
+  GPIO_Init(sADC_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = sADC_CS_PIN;
   GPIO_Init(sADC_CS_GPIO_PORT, &GPIO_InitStructure);

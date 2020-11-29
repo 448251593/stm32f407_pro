@@ -29,6 +29,8 @@
 #include "main.h"
 #include "usart_driver.h"
 #include "spi_net_driver.h"
+#include "xwf_pin_map.h"
+#include "spi_adc_driver.h"
 /** @addtogroup Template_Project
   * @{
   */
@@ -53,15 +55,16 @@ static void Delay(__IO uint32_t nTime);
 int main(void)
 {
 //  GPIO_InitTypeDef GPIO_InitStructure;
-
+int i = 0;
  /*!< At this stage the microcontroller clock setting is already configured,
        this is done through SystemInit() function which is called from startup
        files before to branch to application main.
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
 
-  usart_driver_init();
-
+  gpio_init();
+  usart3_init();
+	sADC_Init();
 
   /* SysTick end of count event each 10ms */
   RCC_GetClocksFreq(&RCC_Clocks);
@@ -70,42 +73,29 @@ int main(void)
   /* Add your application code here */
   /* Insert 50 ms delay */
   Delay(5);
-#if 0
-  /* Output HSE clock on MCO1 pin(PA8) ****************************************/
-  /* Enable the GPIOA peripheral */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-  /* Configure MCO1 pin(PA8) in alternate function */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  /* HSE clock selected to output on MCO1 pin(PA8)*/
-  RCC_MCO1Config(RCC_MCO1Source_HSE, RCC_MCO1Div_1);
-
-
-  /* Output SYSCLK/4 clock on MCO2 pin(PC9) ***********************************/
-  /* Enable the GPIOACperipheral */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-  /* Configure MCO2 pin(PC9) in alternate function */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-  /* SYSCLK/4 clock selected to output on MCO2 pin(PC9)*/
-  RCC_MCO2Config(RCC_MCO2Source_SYSCLK, RCC_MCO2Div_4);
-
-#endif
   /* Infinite loop */
+	led_off(LED_Y);
+	led_off(LED_O);
+	// usart3_send_data("1234567", 7);
   while (1)
   {
+		// led_toggle(LED_Y);
+		// led_toggle(LED_O);
+		Delay(20);
+    uart3_data_poll();
+		spi_adc_read();
+    // if( i  == 0)
+    // {
+		// 	 i = 1;
+    //     sADC_CS_HIGH();
+    // }
+    // else
+    // {
+		// 	i  =0;
+    //    sADC_CS_LOW();
+    // }
+    
   }
 }
 

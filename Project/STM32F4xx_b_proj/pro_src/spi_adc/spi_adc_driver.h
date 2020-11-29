@@ -52,7 +52,7 @@
 
 #define sADC_WIP_FLAG           0x01  /* Write In Progress (WIP) flag */
 
-#define sADC_DUMMY_BYTE         0xA5
+#define sADC_DUMMY_BYTE         0xA5A5
 #define sADC_SPI_PAGESIZE       0x100
 
 #define sADC_M25P128_ID         0x202018
@@ -60,8 +60,8 @@
 
 /* M25P NET SPI Interface pins  */
 #define sADC_SPI                           SPI1
-#define sADC_SPI_CLK                       RCC_APB1Periph_SPI2
-#define sADC_SPI_CLK_INIT                  RCC_APB1PeriphClockCmd
+#define sADC_SPI_CLK                       RCC_APB2Periph_SPI1//RCC_APB1Periph_SPI2
+#define sADC_SPI_CLK_INIT                  RCC_APB2PeriphClockCmd//RCC_APB1PeriphClockCmd
 
 #define sADC_SPI_SCK_PIN                   GPIO_Pin_5
 #define sADC_SPI_SCK_GPIO_PORT             GPIOA
@@ -106,8 +106,8 @@ uint32_t sADC_ReadID(void);
 void sADC_StartReadSequence(uint32_t ReadAddr);
 
 /* Low layer functions */
-uint8_t sADC_ReadByte(void);
-uint8_t sADC_SendByte(uint8_t byte);
+uint16_t sADC_ReadByte(void);
+uint16_t sADC_SendByte(uint16_t byte);
 uint16_t sADC_SendHalfWord(uint16_t HalfWord);
 void sADC_WriteEnable(void);
 void sADC_WaitForWriteEnd(void);

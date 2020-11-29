@@ -24,6 +24,7 @@ uint8_t is62_set_mode(IS62_OPERATE_MODE_ENUM mode)
     selected_spi_cs(sram_cs);
     HAL_SPI_Transmit(&spi_sram, (uint8_t *)set_tx_data, 2, 1000);
     free_spi_cs(sram_cs);
+    return 0;
 }
 
 uint8_t is62_get_mode(void)
@@ -32,7 +33,7 @@ uint8_t is62_get_mode(void)
     set_tx_data[0] = IS62_65WVS5128_CMD_RDMR;
     selected_spi_cs(sram_cs);
     HAL_SPI_Transmit(&spi_sram, (uint8_t *)set_tx_data, 1, 1000);
-    HAL_SPI_Receive(&spi_sram, rx_data, 1, 1000);
+    HAL_SPI_Receive(&spi_sram, &rx_data, 1, 1000);
     free_spi_cs(sram_cs);
     return rx_data;
 }
@@ -228,4 +229,5 @@ uint8_t is62_page_sequent_write(uint32_t page_index, uint32_t word_offset, uint8
         HAL_SPI_Transmit(&spi_sram, (pbuff + die0_bytes), p_size - die0_bytes, 1000);
         free_spi_cs(sram_cs);
     }
+		return 0;
 }

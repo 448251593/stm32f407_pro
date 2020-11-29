@@ -56,9 +56,20 @@
 /* Uncomment the line below if you will use the USART in Transmitter Mode */
 /* #define USART_TRANSMITTER */
 /* Uncomment the line below if you will use the USART in Receiver Mode */
-#define USART_RECEIVER
+// #define USART_RECEIVER
 
+extern uint8_t aTxBuffer[];
+extern uint8_t aRxBuffer[];
+extern uint8_t aCmdBuffer[];
+extern uint8_t aAckBuffer[];
+extern __IO uint8_t ubRxIndex;
+extern __IO uint8_t ubTxIndex;
 
+extern __IO uint8_t ubUsartTransactionType;
+extern __IO uint8_t ubUsartMode;
+
+// __IO uint8_t ubCounter = 0x00;
+// extern __IO uint32_t TimeOut;
 
 // #if defined (USE_STM324x7I_EVAL)
 
@@ -70,13 +81,13 @@
   #define USARTx_IRQHandler                USART3_IRQHandler
 
   #define USARTx_TX_PIN                    GPIO_Pin_10
-  #define USARTx_TX_GPIO_PORT              GPIOC
+  #define USARTx_TX_GPIO_PORT              GPIOB
   #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
   #define USARTx_TX_SOURCE                 GPIO_PinSource10
   #define USARTx_TX_AF                     GPIO_AF_USART3
 
   #define USARTx_RX_PIN                    GPIO_Pin_11
-  #define USARTx_RX_GPIO_PORT              GPIOC
+  #define USARTx_RX_GPIO_PORT              GPIOB
   #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
   #define USARTx_RX_SOURCE                 GPIO_PinSource11
   #define USARTx_RX_AF                     GPIO_AF_USART3
@@ -119,7 +130,10 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-
+int usart3_init(void);
+void USART3_IRQHandler_deal(void);
+void usart3_SysTick_Handler(void);
+void  usart3_send_data(uint8_t* pBuffer, uint16_t BufferLength);
 #ifdef __cplusplus
 }
 #endif
