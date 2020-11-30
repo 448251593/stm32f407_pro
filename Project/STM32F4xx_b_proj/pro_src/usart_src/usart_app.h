@@ -16,6 +16,7 @@
 #define   UART_BUF_SIZE       100
 
 #define   UART1_BUF_SIZE      1024//
+#define   USART1_REC_BUF_SIZE      1024//
 
 #define   UART2_BUF_SIZE      500//
 
@@ -35,11 +36,11 @@ extern unsigned char        Uart4RxBuf[UART4_RXBUF_SIZE];
 void   Uart_Config(void);
 void   UartSendData( char Uart_num, char *p, uint16_t len);
 
+void UartpollSend(void);
 
-void UartpollSend(void );
-
-void  CreatUartTask(void);
+void CreatUartTask(void);
 uint8_t usart_get_fifo(uint8_t *pdata);
-void   Usart3SendData(char *p, uint16_t len);
-
+void Usart3SendData(char *p, uint16_t len);
+uint8_t usart3_put_fifo(uint8_t pdt);
+uint8_t usart3_parse_cmd(void);
 #endif

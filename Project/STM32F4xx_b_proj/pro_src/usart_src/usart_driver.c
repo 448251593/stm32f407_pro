@@ -215,17 +215,19 @@ void USART3_IRQHandler_deal(void)
   /* USART in Receiver mode */
 	if (USART_GetITStatus(USARTx, USART_IT_RXNE) == SET)
 	{
-		if (ubRxIndex < BUFFERSIZE)
-		{
-			/* Receive Transaction data */
-			aRxBuffer[ubRxIndex++] = USART_ReceiveData(USARTx);
-		}
-		else
-		{
-			TimeOut++;
-			/* Disable the Rx buffer not empty interrupt */
-			//   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
-		}
+		tmp = USART_ReceiveData(USARTx);
+		usart3_put_fifo(tmp);
+		// if (ubRxIndex < BUFFERSIZE)
+		// {
+		// 	/* Receive Transaction data */
+		// 	aRxBuffer[ubRxIndex++] = USART_ReceiveData(USARTx);
+		// }
+		// else
+		// {
+		// 	TimeOut++;
+		// 	/* Disable the Rx buffer not empty interrupt */
+		// 	//   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
+		// }
 	}
 	/* USART in Transmitter mode */
 	if (USART_GetITStatus(USARTx, USART_IT_TXE) == SET)

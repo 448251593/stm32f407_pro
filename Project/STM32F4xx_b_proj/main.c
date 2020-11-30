@@ -32,10 +32,12 @@
 #include "xwf_pin_map.h"
 #include "spi_adc_driver.h"
 #include "usart_app.h"
+#include "spi_adc_app.h"
+
 /** @addtogroup Template_Project
   * @{
   */
-
+extern void gpio_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +58,7 @@ static void Delay(__IO uint32_t nTime);
 int main(void)
 {
 //  GPIO_InitTypeDef GPIO_InitStructure;
-int i = 0;
+//int i = 0;
  /*!< At this stage the microcontroller clock setting is already configured,
        this is done through SystemInit() function which is called from startup
        files before to branch to application main.
@@ -85,8 +87,9 @@ int i = 0;
 		led_toggle(LED_O);
 		Delay(20);
     //uart3_data_poll();
-		spi_adc_read();
-    Usart3SendData("hello world", 11);
+		// spi_adc_read();
+    adc_read_deal();
+    usart3_parse_cmd();
     // if( i  == 0)
     // {
 		// 	 i = 1;
