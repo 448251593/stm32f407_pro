@@ -31,6 +31,7 @@
 #include "spi_net_driver.h"
 #include "xwf_pin_map.h"
 #include "spi_adc_driver.h"
+#include "usart_app.h"
 /** @addtogroup Template_Project
   * @{
   */
@@ -76,15 +77,16 @@ int i = 0;
 
   /* Infinite loop */
 	led_off(LED_Y);
-	led_off(LED_O);
+	led_on(LED_O);
 	// usart3_send_data("1234567", 7);
   while (1)
   {
-		// led_toggle(LED_Y);
-		// led_toggle(LED_O);
+		led_toggle(LED_Y);
+		led_toggle(LED_O);
 		Delay(20);
-    uart3_data_poll();
+    //uart3_data_poll();
 		spi_adc_read();
+    Usart3SendData("hello world", 11);
     // if( i  == 0)
     // {
 		// 	 i = 1;

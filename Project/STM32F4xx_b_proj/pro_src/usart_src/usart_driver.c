@@ -70,7 +70,7 @@ int usart3_init(void)
        To reconfigure the default setting of SystemInit() function, refer to
        system_stm32f4xx.c file
      */
-  
+  UartFifoInit();
   /* USART configuration -----------------------------------------------------*/
   USART_Config();
   
@@ -156,7 +156,7 @@ static void USART_Config(void)
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */ 
-  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_BaudRate = 921600;//115200;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -211,43 +211,45 @@ void usart3_SysTick_Handler(void)
 */
 void USART3_IRQHandler_deal(void)
 {
+	uint8_t   tmp;
   /* USART in Receiver mode */
-  if (USART_GetITStatus(USARTx, USART_IT_RXNE) == SET)
-  {
-    if (ubRxIndex < BUFFERSIZE)
-    {
-      /* Receive Transaction data */
-      aRxBuffer[ubRxIndex++] = USART_ReceiveData(USARTx);
-    }
-    else
-    {
-		TimeOut++;
-      /* Disable the Rx buffer not empty interrupt */
-    //   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
-    }
-  }
-  /* USART in Transmitter mode */
-  if (USART_GetITStatus(USARTx, USART_IT_TXE) == SET)
-  {
-    if (ubTxIndex < aTxBuffer_datalen)
-    {
-      /* Send Transaction data */
-      USART_SendData(USARTx, aTxBuffer[ubTxIndex++]);
-    }
-    else
-    {
-      /* Disable the Tx buffer empty interrupt */
-      USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
-    }
-  }
+	if (USART_GetITStatus(USARTx, USART_IT_RXNE) == SET)
+	{
+		if (ubRxIndex < BUFFERSIZE)
+		{
+			/* Receive Transaction data */
+			aRxBuffer[ubRxIndex++] = USART_ReceiveData(USARTx);
+		}
+		else
+		{
+			TimeOut++;
+			/* Disable the Rx buffer not empty interrupt */
+			//   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
+		}
+	}
+	/* USART in Transmitter mode */
+	if (USART_GetITStatus(USARTx, USART_IT_TXE) == SET)
+	{
+		if (usart3_get_fifo(&tmp))
+		{
+			/* Send Transaction data */
+			USART_SendData(USARTx, tmp);
+		}
+		else
+		{
+			/* Disable the Tx buffer empty interrupt */
+			USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
+		}
+	}
 }
-void  usart3_send_data(uint8_t* pBuffer, uint16_t BufferLength)
-{
-	memcpy(aTxBuffer, pBuffer, BufferLength);
-	aTxBuffer_datalen = BufferLength;
-	USART_ITConfig(USARTx, USART_IT_TXE,ENABLE);
+// }
 
+void usart3_driver_send_enable(void)
+{
+	USART_ITConfig(USARTx, USART_IT_TXE, ENABLE);
 }
+
+
 /**
   * @brief  Compares two buffers.
   * @param  pBuffer1, pBuffer2: buffers to be compared.

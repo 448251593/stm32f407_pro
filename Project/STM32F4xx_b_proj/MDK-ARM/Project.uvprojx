@@ -338,7 +338,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40_41xxx,USE_STM324xG_EVAL</Define>
               <Undefine></Undefine>
-              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src;..\pro_src\spi_flash;..\pro_src\spi_net;..\pro_src\spi_adc;..\pro_src\bsp\inc</IncludePath>
+              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src;..\pro_src\spi_flash;..\pro_src\spi_net;..\pro_src\spi_adc;..\pro_src\bsp\inc;..\pro_src\usart_src</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -649,12 +649,22 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>mid_driver</GroupName>
+          <GroupName>usart_src</GroupName>
           <Files>
+            <File>
+              <FileName>fifobuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_src\fifobuffer.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_src\usart_app.c</FilePath>
+            </File>
             <File>
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\pro_src\usart_driver.c</FilePath>
+              <FilePath>..\pro_src\usart_src\usart_driver.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2028,12 +2038,22 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>mid_driver</GroupName>
+          <GroupName>usart_src</GroupName>
           <Files>
+            <File>
+              <FileName>fifobuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_src\fifobuffer.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\usart_src\usart_app.c</FilePath>
+            </File>
             <File>
               <FileName>usart_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\pro_src\usart_driver.c</FilePath>
+              <FilePath>..\pro_src\usart_src\usart_driver.c</FilePath>
             </File>
           </Files>
         </Group>

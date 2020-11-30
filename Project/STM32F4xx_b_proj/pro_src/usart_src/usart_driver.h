@@ -82,13 +82,13 @@ extern __IO uint8_t ubUsartMode;
 
   #define USARTx_TX_PIN                    GPIO_Pin_10
   #define USARTx_TX_GPIO_PORT              GPIOB
-  #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOC
+  #define USARTx_TX_GPIO_CLK               RCC_AHB1Periph_GPIOB
   #define USARTx_TX_SOURCE                 GPIO_PinSource10
   #define USARTx_TX_AF                     GPIO_AF_USART3
 
   #define USARTx_RX_PIN                    GPIO_Pin_11
   #define USARTx_RX_GPIO_PORT              GPIOB
-  #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOC
+  #define USARTx_RX_GPIO_CLK               RCC_AHB1Periph_GPIOB
   #define USARTx_RX_SOURCE                 GPIO_PinSource11
   #define USARTx_RX_AF                     GPIO_AF_USART3
 
@@ -134,6 +134,7 @@ int usart3_init(void);
 void USART3_IRQHandler_deal(void);
 void usart3_SysTick_Handler(void);
 void  usart3_send_data(uint8_t* pBuffer, uint16_t BufferLength);
+void usart3_driver_send_enable(void);
 #ifdef __cplusplus
 }
 #endif
