@@ -38,6 +38,10 @@
   * @{
   */
 extern void gpio_init(void);
+extern void led_on(uint16_t led_num);
+extern void led_off(uint16_t led_num);
+extern void led_toggle(uint16_t led_num);
+extern int timer9_driver_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -57,51 +61,50 @@ static void Delay(__IO uint32_t nTime);
   */
 int main(void)
 {
-//  GPIO_InitTypeDef GPIO_InitStructure;
-//int i = 0;
- /*!< At this stage the microcontroller clock setting is already configured,
+	//  GPIO_InitTypeDef GPIO_InitStructure;
+	//int i = 0;
+	/*!< At this stage the microcontroller clock setting is already configured,
        this is done through SystemInit() function which is called from startup
        files before to branch to application main.
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
 
-  gpio_init();
-  usart3_init();
+	gpio_init();
+	usart3_init();
 	sADC_Init();
+	timer9_driver_init();
+	/* SysTick end of count event each 10ms */
+	RCC_GetClocksFreq(&RCC_Clocks);
+	SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
 
-  /* SysTick end of count event each 10ms */
-  RCC_GetClocksFreq(&RCC_Clocks);
-  SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
+	/* Add your application code here */
+	/* Insert 50 ms delay */
+	Delay(5);
 
-  /* Add your application code here */
-  /* Insert 50 ms delay */
-  Delay(5);
-
-  /* Infinite loop */
+	/* Infinite loop */
 	led_off(LED_Y);
 	led_on(LED_O);
 	// usart3_send_data("1234567", 7);
-  while (1)
-  {
+	while (1)
+	{
 		led_toggle(LED_Y);
 		led_toggle(LED_O);
 		Delay(20);
-    //uart3_data_poll();
+		//uart3_data_poll();
 		// spi_adc_read();
-    adc_read_deal();
-    usart3_parse_cmd();
-    // if( i  == 0)
-    // {
+		// adc_read_deal();
+		usart3_parse_cmd();
+		// if( i  == 0)
+		// {
 		// 	 i = 1;
-    //     sADC_CS_HIGH();
-    // }
-    // else
-    // {
+		//     sADC_CS_HIGH();
+		// }
+		// else
+		// {
 		// 	i  =0;
-    //    sADC_CS_LOW();
-    // }
-    
-  }
+		//    sADC_CS_LOW();
+		// }
+	}
 }
 
 /**
@@ -111,9 +114,10 @@ int main(void)
   */
 void Delay(__IO uint32_t nTime)
 {
-  uwTimingDelay = nTime;
+	uwTimingDelay = nTime;
 
-  while(uwTimingDelay != 0);
+	while (uwTimingDelay != 0)
+		;
 }
 
 /**
@@ -123,13 +127,13 @@ void Delay(__IO uint32_t nTime)
   */
 void TimingDelay_Decrement(void)
 {
-  if (uwTimingDelay != 0x00)
-  {
-    uwTimingDelay--;
-  }
+	if (uwTimingDelay != 0x00)
+	{
+		uwTimingDelay--;
+	}
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 
 /**
   * @brief  Reports the name of the source file and the source line number
@@ -138,21 +142,20 @@ void TimingDelay_Decrement(void)
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t* file, uint32_t line)
+void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* User can add his own implementation to report the file name and line number,
+	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-  /* Infinite loop */
-  while (1)
-  {
-  }
+	/* Infinite loop */
+	while (1)
+	{
+	}
 }
 #endif
 
 /**
   * @}
   */
-
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
