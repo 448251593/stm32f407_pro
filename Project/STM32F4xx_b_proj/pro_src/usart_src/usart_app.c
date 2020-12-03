@@ -135,6 +135,11 @@ uint8_t  isdigit_check(char *str)
 }
 uint8_t   cmdbuf[128];
 uint32_t  param = 0;
+uint8_t   usart3_recv_idle = 0;
+uint8_t  usart3_set_idle(void)
+{
+    usart3_recv_idle = 1;
+}
 uint8_t  usart3_parse_cmd(void)
 {
 //    int iRet = 0;
@@ -145,8 +150,9 @@ uint8_t  usart3_parse_cmd(void)
     uint8_t  tmp_buf[100];
 //    uint16_t  val;
 
-    if (iBuffLen  > 0)
+    if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
     {
+        usart3_recv_idle = 0;
         memset(cmdbuf, 0, sizeof(cmdbuf));
         if (iBuffLen <= sizeof(cmdbuf))
         {
@@ -175,6 +181,12 @@ uint8_t  usart3_parse_cmd(void)
             {
                 extern void  adc_read_start(void);
                 adc_read_start();
+                printf("start=%d\n", get_global_tick());
+            }
+            p2 =  strstr((p1+3),"read");
+            if(p2)
+            {
+                print_adc_data();
             }
             // val = spi_adc_read();
             // sprintf(tmp_buf, "%d,", val);

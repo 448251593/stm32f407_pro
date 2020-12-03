@@ -99,6 +99,7 @@ int usart3_init(void)
   
   /* Enable the Tx buffer empty interrupt */
   USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);
+//   USART_ITConfig(USARTx, USART_IT_IDLE, ENABLE);
 
 
 }
@@ -156,7 +157,7 @@ static void USART_Config(void)
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */ 
-  USART_InitStructure.USART_BaudRate = 921600;//115200;
+  USART_InitStructure.USART_BaudRate = 5250000;//921600;//115200;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -242,6 +243,14 @@ void USART3_IRQHandler_deal(void)
 			/* Disable the Tx buffer empty interrupt */
 			USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
 		}
+	}
+	
+	if (USART_GetITStatus(USARTx, USART_IT_IDLE) == SET)
+	{
+		//空闲中断
+		usart3_set_idle();
+		USART3->DR;                                       //读取数据。注意：这句必须要，否则不能够清除中断标志位
+		USART_ClearITPendingBit(USARTx, USART_IT_IDLE);
 	}
 }
 // }

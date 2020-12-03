@@ -131,7 +131,7 @@ uint16_t sADC_ReadByte(void)
 	sADC_CS_LOW();
 	t = sADC_SendByte(sADC_DUMMY_BYTE);
 	sADC_CS_HIGH();
-	sADC_CS_HIGH();
+	// sADC_CS_HIGH();
 	
 	return t;
 }

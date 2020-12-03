@@ -27,7 +27,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
-
+#include "xwf_pin_map.h"
+#include "spi_adc_app.h"
+#include "main.h"
+#include "tim9_driver.h"
 /** @addtogroup STM32F4xx_StdPeriph_Examples
   * @{
   */
@@ -131,7 +134,7 @@ int timer9_driver_init(void)
 
 	/* TIM IT enable */
 	// TIM_ITConfig(TIM9, TIM_IT_CC1 | TIM_IT_CC2, ENABLE);
-	TIM_ITConfig(TIM9, TIM_IT_CC2, ENABLE);
+	TIM_ITConfig(TIM9, TIM_IT_CC1, ENABLE);
 
 	// while (1)
 	// {}
@@ -185,6 +188,10 @@ void TIM_Config(void)
   * @param  None
   * @retval None
   */
+static __IO uint32_t timer_tick_ms_g = 0;
+uint32_t   count_test = 0;
+
+
 void TIM9_IRQHandler_s(void)
 {
   /* TIM9_CH1 toggling with frequency = 500khz;//183.1 Hz */
@@ -193,6 +200,15 @@ void TIM9_IRQHandler_s(void)
     TIM_ClearITPendingBit(TIM9, TIM_IT_CC1);
     capture = TIM_GetCapture1(TIM9);
     TIM_SetCompare1(TIM9, capture + CCR1_Val);
+	count_test++;
+	if(count_test== 2*500)//add by bcg,2020-12-02 21:19:57 1000
+	{
+		count_test = 0;
+		// led_toggle(LED_Y);
+		// get_adc_data();
+
+	}
+  	timer_tick_ms_g++;
   }
 
   /* TIM9_CH2 toggling with frequency = 366.2 Hz */
@@ -203,6 +219,10 @@ void TIM9_IRQHandler_s(void)
     TIM_SetCompare2(TIM9, capture + CCR2_Val);
   }
 
+}
+uint32_t get_global_tick(void)
+{
+  return  timer_tick_ms_g;
 }
 #ifdef  USE_FULL_ASSERT
 

@@ -33,6 +33,7 @@
 #include "spi_adc_driver.h"
 #include "usart_app.h"
 #include "spi_adc_app.h"
+#include "tim9_driver.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -41,12 +42,13 @@ extern void gpio_init(void);
 extern void led_on(uint16_t led_num);
 extern void led_off(uint16_t led_num);
 extern void led_toggle(uint16_t led_num);
-extern int timer9_driver_init(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t uwTimingDelay;
+
+
 RCC_ClocksTypeDef RCC_Clocks;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,7 +70,7 @@ int main(void)
        files before to branch to application main.
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
-
+  // uint32_t   tmp_count = 0;
 	gpio_init();
 	usart3_init();
 	sADC_Init();
@@ -83,18 +85,20 @@ int main(void)
 
 	/* Infinite loop */
 	led_off(LED_Y);
-	led_on(LED_O);
+	led_off(LED_O);
+	adc_read_start();
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
-		led_toggle(LED_Y);
-		led_toggle(LED_O);
-		Delay(20);
+		// led_toggle(LED_Y);
+		// led_toggle(LED_O);
+    // tmp_count++;
+		// Delay(1);
 		//uart3_data_poll();
 		// spi_adc_read();
 		// adc_read_deal();
-		usart3_parse_cmd();
-		// if( i  == 0)
+    get_adc_data();
+    // if( i  == 0)
 		// {
 		// 	 i = 1;
 		//     sADC_CS_HIGH();
@@ -131,7 +135,11 @@ void TimingDelay_Decrement(void)
 	{
 		uwTimingDelay--;
 	}
+
+  usart3_parse_cmd();
+
 }
+
 
 #ifdef USE_FULL_ASSERT
 
