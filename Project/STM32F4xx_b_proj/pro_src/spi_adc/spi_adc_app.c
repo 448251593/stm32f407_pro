@@ -40,7 +40,7 @@ void  adc_read_deal(void)
 	}
 
 }
-#define      ADC_V_MAX_NUM    1000
+#define      ADC_V_MAX_NUM    10000
 uint16_t    adc_v[ADC_V_MAX_NUM] = 0;
 uint16_t    adc_v_index = 0;
 void   get_adc_data(void)
@@ -63,12 +63,13 @@ void   get_adc_data(void)
 }
 void   print_adc_data(void)
 {
-	int i;
+	int i = 0;
 	printf("---\n");
-	for (i = 0; i < ADC_V_MAX_NUM; i++)
+	// printf("%04d,", adc_v[i]);
+	for (i = 1; i < ADC_V_MAX_NUM+1; i++)
 	{
-		printf("%04d,", adc_v[i]);
-		if(i%20==0)
+		printf("%04d,", adc_v[i-1]);
+		if (i % 20 == 0)
 		{
 			printf("\n");
 		}

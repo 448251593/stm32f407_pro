@@ -34,6 +34,7 @@
 #include "usart_app.h"
 #include "spi_adc_app.h"
 #include "tim9_driver.h"
+#include "stdio.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -70,7 +71,7 @@ int main(void)
        files before to branch to application main.
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
-  // uint32_t   tmp_count = 0;
+  uint32_t   tmp_count = 0;
 	gpio_init();
 	usart3_init();
 	sADC_Init();
@@ -86,7 +87,8 @@ int main(void)
 	/* Infinite loop */
 	led_off(LED_Y);
 	led_off(LED_O);
-	adc_read_start();
+	// adc_read_start();
+	spi_adc_read();//add by bcg,2020-12-05 11:14:05第一次读取0值去掉 
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
@@ -98,6 +100,11 @@ int main(void)
 		// spi_adc_read();
 		// adc_read_deal();
     get_adc_data();
+    if(get_global_tick() - tmp_count >= 1000*1000)
+    {
+        tmp_count = get_global_tick();
+		printf("tmp_count=%d",tmp_count);
+    }
     // if( i  == 0)
 		// {
 		// 	 i = 1;
