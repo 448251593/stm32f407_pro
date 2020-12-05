@@ -37,6 +37,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 
+
+#define     SPI_ADC_DMA_ENABLE    0
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
@@ -84,7 +86,15 @@
 #define sADC_CS_PIN                        GPIO_Pin_4
 #define sADC_CS_GPIO_PORT                  GPIOA
 #define sADC_CS_GPIO_CLK                   RCC_AHB1Periph_GPIOA
-
+//---------------------------dma-----------------------------------------------
+// #define sADC_SPI_DMA                       DMA1
+#define sADC_SPI_DMA_CLK                   RCC_AHB1Periph_DMA1
+#define sADC_SPI_TX_DMA_CHANNEL            DMA_Channel_0
+#define sADC_SPI_TX_DMA_STREAM             DMA1_Stream4
+#define sADC_SPI_TX_DMA_FLAG_TCIF          DMA_FLAG_TCIF4
+#define sADC_SPI_RX_DMA_CHANNEL            DMA_Channel_0
+#define sADC_SPI_RX_DMA_STREAM             DMA1_Stream3
+#define sADC_SPI_RX_DMA_FLAG_TCIF          DMA_FLAG_TCIF3
 
 /* Exported macro ------------------------------------------------------------*/
 /* Select sADC: Chip Select pin low */

@@ -162,11 +162,21 @@ void USARTx_IRQHandler(void)
 	// data_recv_usart();
   USART3_IRQHandler_deal();
 }
+//void TIM1_BRK_TIM9_IRQHandler(void)
+//{
+//	TIM9_IRQHandler_s();
+//}
+
+/**
+  * @brief  This function handles TIM9 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+extern void TIM9_IRQHandler_s(void);
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
 	TIM9_IRQHandler_s();
 }
-
 /**
   * @brief  This function handles SPI interrupt request.
   * @param  None

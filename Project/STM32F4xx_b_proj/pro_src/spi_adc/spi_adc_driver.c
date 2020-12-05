@@ -114,10 +114,83 @@ void sADC_Init(void)
   SPI_InitStructure.SPI_CRCPolynomial = 7;
   SPI_Init(sADC_SPI, &SPI_InitStructure);
 
-  /*!< Enable the sADC_SPI  */
-  SPI_Cmd(sADC_SPI, ENABLE);
+#if SPI_ADC_DMA_ENABLE
+
+#else
+/*!< Enable the sADC_SPI  */
+	SPI_Cmd(sADC_SPI, ENABLE);
+#endif
+
+
+
+
+}
+#if SPI_ADC_DMA_ENABLE
+void sADC_dma_start(void)
+{
+	/* Enable DMA SPI TX Stream */
+	DMA_Cmd(sADC_SPI_TX_DMA_STREAM, ENABLE);
+
+	/* Enable DMA SPI RX Stream */
+	DMA_Cmd(sADC_SPI_RX_DMA_STREAM, ENABLE);
+
+	/* Enable SPI DMA TX Requsts */
+	SPI_I2S_DMACmd(sADC_SPI, SPI_I2S_DMAReq_Tx, ENABLE);
+
+	/* Enable SPI DMA RX Requsts */
+	SPI_I2S_DMACmd(sADC_SPI, SPI_I2S_DMAReq_Rx, ENABLE);
+
+	// /* Enable the SPI peripheral */
+	// SPI_Cmd(sADC_SPI, ENABLE);
+
+	/*!< Enable the sADC_SPI  */
+	SPI_Cmd(sADC_SPI, ENABLE);
+}
+void sADC_dma_stop(void)
+{
+	/* Enable DMA SPI TX Stream */
+	DMA_Cmd(sADC_SPI_TX_DMA_STREAM, DISABLE);
+
+	/* Enable DMA SPI RX Stream */
+	DMA_Cmd(sADC_SPI_RX_DMA_STREAM, DISABLE);
+
+	/* Enable SPI DMA TX Requsts */
+	SPI_I2S_DMACmd(sADC_SPI, SPI_I2S_DMAReq_Tx, DISABLE);
+
+	/* Enable SPI DMA RX Requsts */
+	SPI_I2S_DMACmd(sADC_SPI, SPI_I2S_DMAReq_Rx, DISABLE);
+
+	// /* Enable the SPI peripheral */
+	// SPI_Cmd(sADC_SPI, ENABLE);
+
+	/*!< Enable the sADC_SPI  */
+	SPI_Cmd(sADC_SPI, DISABLE);
 }
 
+
+uint8_t  sADC_dma_check_finish(void)
+{
+	/* Waiting the end of Data transfer */
+	//   while (DMA_GetFlagStatus(sADC_SPI_TX_DMA_STREAM,sADC_SPI_TX_DMA_FLAG_TCIF)==RESET);
+	//   while (DMA_GetFlagStatus(sADC_SPI_RX_DMA_STREAM,sADC_SPI_RX_DMA_FLAG_TCIF)==RESET);
+	/* Clear DMA Transfer Complete Flags */
+	// DMA_ClearFlag(sADC_SPI_TX_DMA_STREAM, sADC_SPI_TX_DMA_FLAG_TCIF);
+	// DMA_ClearFlag(sADC_SPI_RX_DMA_STREAM, sADC_SPI_RX_DMA_FLAG_TCIF);
+	uint8_t  ret = 0;
+	if (DMA_GetFlagStatus(sADC_SPI_TX_DMA_STREAM, sADC_SPI_TX_DMA_FLAG_TCIF) == RESET)
+	{
+		ret = ret | 0x01;
+		DMA_ClearFlag(sADC_SPI_TX_DMA_STREAM, sADC_SPI_TX_DMA_FLAG_TCIF);
+	}
+	if (DMA_GetFlagStatus(sADC_SPI_RX_DMA_STREAM, sADC_SPI_RX_DMA_FLAG_TCIF) == RESET)
+	{
+		ret = ret | 0x02;
+		DMA_ClearFlag(sADC_SPI_RX_DMA_STREAM, sADC_SPI_RX_DMA_FLAG_TCIF);
+	}
+	return ret;
+
+}
+#endif
 /**
   * @brief  Reads a byte from the SPI NET.
   * @note   This function must be used only if the Start_Read_Sequence function
@@ -132,7 +205,7 @@ uint16_t sADC_ReadByte(void)
 	t = sADC_SendByte(sADC_DUMMY_BYTE);
 	sADC_CS_HIGH();
 	// sADC_CS_HIGH();
-	
+
 	return t;
 }
 
@@ -144,7 +217,7 @@ uint16_t sADC_ReadByte(void)
   */
 uint16_t sADC_SendByte(uint16_t byte)
 {
-   
+
   /*!< Loop while DR register in not empty */
   while (SPI_I2S_GetFlagStatus(sADC_SPI, SPI_I2S_FLAG_TXE) == RESET);
 
@@ -182,6 +255,11 @@ void SPI_adc_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *p
 		pBuffer_rx++;
 	}
 }
+#if SPI_ADC_DMA_ENABLE
+#define BUFFERSIZE_ADC   1024
+uint16_t adc_dma_RxBuffer[BUFFERSIZE_ADC];
+#endif
+
 /**
   * @brief  Initializes the peripherals used by the SPI NET driver.
   * @param  None
@@ -229,6 +307,43 @@ void sADC_LowLevel_Init(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(sADC_CS_GPIO_PORT, &GPIO_InitStructure);
+//----------------------------------------------------------------------------
+#if SPI_ADC_DMA_ENABLE
+  DMA_InitTypeDef DMA_InitStructure;
+
+  /* Enable DMA clock */
+  RCC_AHB1PeriphClockCmd(sADC_SPI_DMA_CLK, ENABLE);
+  /* DMA configuration -------------------------------------------------------*/
+  /* Deinitialize DMA Streams */
+  DMA_DeInit(sADC_SPI_TX_DMA_STREAM);
+  DMA_DeInit(sADC_SPI_RX_DMA_STREAM);
+
+  /* Configure DMA Initialization Structure */
+  DMA_InitStructure.DMA_BufferSize = BUFFERSIZE_ADC ;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable ;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull ;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single ;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_PeripheralBaseAddr =(uint32_t) (&(sADC_SPI->DR)) ;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;//DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  /* Configure TX DMA */
+  DMA_InitStructure.DMA_Channel = sADC_SPI_TX_DMA_CHANNEL ;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral ;
+  DMA_InitStructure.DMA_Memory0BaseAddr =(uint32_t)adc_dma_RxBuffer ;//发送发送数据随便
+  DMA_Init(sADC_SPI_TX_DMA_STREAM, &DMA_InitStructure);
+  /* Configure RX DMA */
+  DMA_InitStructure.DMA_Channel = sADC_SPI_RX_DMA_CHANNEL ;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory ;
+  DMA_InitStructure.DMA_Memory0BaseAddr =(uint32_t)adc_dma_RxBuffer ;
+  DMA_Init(sADC_SPI_RX_DMA_STREAM, &DMA_InitStructure);
+
+  #endif
+
 }
 
 /**

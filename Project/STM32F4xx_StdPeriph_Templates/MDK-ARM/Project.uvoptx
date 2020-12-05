@@ -520,7 +520,7 @@
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>0</IsCurrentTarget>
       </OPTFL>
-      <CpuCode>0</CpuCode>
+      <CpuCode>18</CpuCode>
       <DebugOpt>
         <uSim>0</uSim>
         <uTrg>1</uTrg>
@@ -673,7 +673,7 @@
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>0</IsCurrentTarget>
       </OPTFL>
-      <CpuCode>0</CpuCode>
+      <CpuCode>18</CpuCode>
       <DebugOpt>
         <uSim>0</uSim>
         <uTrg>1</uTrg>
@@ -1263,7 +1263,7 @@
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>0</IsCurrentTarget>
       </OPTFL>
-      <CpuCode>0</CpuCode>
+      <CpuCode>18</CpuCode>
       <DebugOpt>
         <uSim>0</uSim>
         <uTrg>1</uTrg>
