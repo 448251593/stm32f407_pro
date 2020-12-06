@@ -2,13 +2,14 @@
 //*
 //@file    socket.c
 //@brief   setting chip register for socket
-#if 0
-#include "app/fpga.h"
-#include "app/def.h"
-#include "app/data.h"
-#include "app/function.h"
+#if 1
+// #include "app/fpga.h"
+// #include "app/def.h"
+// #include "app/data.h"
+// #include "app/function.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include "w5500.h"
 
 #include "socket.h"
@@ -25,6 +26,12 @@ unsigned short anyport=9013;
 
 static unsigned short local_port;
 
+
+uint16_t   socket_state;
+uint16_t   heart_beat_time;
+uint16_t   protocal_overtime;
+uint16_t   rx_tail;
+uint8_t    recv_buf[128];
 ///**
 //@brief   This Socket function initialize the channel in perticular mode, and set the port and wait for W5200 done it.
 //@return  1 for sucess else 0.
@@ -229,7 +236,7 @@ unsigned short send(SOCKET s, const uint8_t * buf, unsigned short len)
     status = IINCHIP_READ(Sn_SR(s));
     if ((status != SOCK_ESTABLISHED) && (status != SOCK_CLOSE_WAIT) )
     {
-   //   printf("SEND_OK Problem!!\r\n");
+   //   LOG_INFO("SEND_OK Problem!!\r\n");
       close(s);
       return 0;
     }
@@ -384,7 +391,7 @@ unsigned short recvfrom(SOCKET s, uint8_t * buf, unsigned short len, uint8_t * a
         data_len = (data_len<<8) + head[1] - 2;
         if(data_len > 1514)
         {
-//           printf("data_len over 1514\r\n");
+//           LOG_INFO("data_len over 1514\r\n");
            while(1);
         }
 
@@ -467,8 +474,8 @@ unsigned short recvfrom(SOCKET s, uint8_t * buf, unsigned short len, uint8_t * a
 
 //      if(data_len > 1514)
 //      {
-////         printf("data_len over 1514\r\n");
-////         printf("\r\nptr: %X, data_len: %X", ptr, data_len);
+////         LOG_INFO("data_len over 1514\r\n");
+////         LOG_INFO("\r\nptr: %X, data_len: %X", ptr, data_len);
 //         //while(1);
 //          recommand : close and open **/
 // /*        close(sock_num); // Close the 0-th socket
@@ -518,78 +525,76 @@ uint8_t SendSocketData(SOCKET s, uint8_t * buf, uint16_t len)
 	return 0;
 }
 
-
 void NetLoop(void)
 {
-	unsigned char state,phy_cfgr;
-	unsigned short erx_len,etx_len;
-    unsigned char i,j=0,num=0;
-    uint8_t message[] = "Hello World";
-	 phy_cfgr = getPHYCFGR();
-		if(!(phy_cfgr&0x1))
-		{
-				disconnect(0);
-				socket_state=Connect_none;
-		  	  return;
-		}
-
-	state=getSn_SR(0);
-//	debug("net",state);
-	switch(state)/*获取socket0的状态*/
+	unsigned char state, phy_cfgr;
+	unsigned short erx_len; //,etx_len;
+	//unsigned char i,j=0,num=0;
+	uint8_t message[] = "Hello World";
+	phy_cfgr = getPHYCFGR();
+	if (!(phy_cfgr & 0x1))
 	{
-	case SOCK_INIT:/*socket初始化完成*/
-		// delay_ms(100);
-	     connect(0, RJ45_config.server_ip ,RJ45_config.server_port[0]);/*在TCP模式下向服务器发送连接请求*/
-		//printf("SI\n");
-	break;
+		disconnect(0);
+		socket_state = Connect_none;
+		return;
+	}
 
-	case SOCK_ESTABLISHED:/*socket连接建立*/
-		 if(getSn_IR(0) & Sn_IR_CON)
-		    {
-			setSn_IR(0, Sn_IR_CON);/*Sn_IR的第0位置1而清0*/
-		    }
-         switch(socket_state)
-	        {
-			case Disconnect:
-				 socket_state=Connect;
-                 SendSocketData(0,message,sizeof(message));//向Server发送数据
+	state = getSn_SR(0);
+	//	debug("net",state);
+	switch (state) /*获取socket0的状态*/
+	{
+	case SOCK_INIT:																  /*socket初始化完成*/
+																				  // delay_ms(100);
+		connect(0, (uint8_t *)RJ45_config.server_ip, RJ45_config.server_port[0]); /*在TCP模式下向服务器发送连接请求*/
+																				  //LOG_INFO("SI\n");
+		break;
+
+	case SOCK_ESTABLISHED: /*socket连接建立*/
+		if (getSn_IR(0) & Sn_IR_CON)
+		{
+			setSn_IR(0, Sn_IR_CON); /*Sn_IR的第0位置1而清0*/
+		}
+		switch (socket_state)
+		{
+		case Disconnect:
+			socket_state = Connect;
+			SendSocketData(0, message, sizeof(message)); //向Server发送数据
 			break;
 
-
-             case Connect:
-	             erx_len=getSn_RX_RSR(0);//len为已接收数据的大小
-		         if(erx_len>0)
-		          {
-		         recv(0,recv_buf,erx_len);//W5500接收来自Sever的数据
-				 rx_tail=rx_tail+erx_len;
-			     protocal_overtime=0;
-                 recv_buf[rx_tail++]=0x00;
-                 RJ45_config.enable=1;
-                   }
-	            if(heart_beat_time>=HEART_BEAT_CNT_MAX)
-		           {
-			      SendSocketData(0,message,sizeof(message));//向Server发送数据
-		           }
-
-	          break;
-              default:break;
+		case Connect:
+			erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
+			if (erx_len > 0)
+			{
+				recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
+				rx_tail = rx_tail + erx_len;
+				protocal_overtime = 0;
+				recv_buf[rx_tail++] = 0x00;
+				RJ45_config.enable = 1;
 			}
-    break;
+			if (heart_beat_time >= HEART_BEAT_CNT_MAX)
+			{
+				SendSocketData(0, message, sizeof(message)); //向Server发送数据
+			}
 
-	case SOCK_CLOSE_WAIT:/*socket等待关闭状态*/
-	    disconnect(0);
-	break;
+			break;
+		default:
+			break;
+		}
+		break;
 
-	case SOCK_CLOSED:/*socket关闭*/
-		 socket_state=Disconnect;
-	     socket(0,Sn_MR_TCP,anyport++,Sn_MR_ND);/*打开socket0的一个端口*/
-	break;
+	case SOCK_CLOSE_WAIT: /*socket等待关闭状态*/
+		disconnect(0);
+		break;
+
+	case SOCK_CLOSED: /*socket关闭*/
+		socket_state = Disconnect;
+		socket(0, Sn_MR_TCP, anyport++, Sn_MR_ND); /*打开socket0的一个端口*/
+		break;
 	default:
 		//printf("SOCK_DEFAULT %d\n", getSn_SR(0));
-	break;
+		break;
 	}
 }
-
 
 //unsigned short process_erx_buf(unsigned short len)
 //{

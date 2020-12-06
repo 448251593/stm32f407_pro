@@ -20,18 +20,8 @@
 #include "w5500.h"
 #include "protocol.h"
 #include "main.h"
-typedef struct 
-{
-	char local_ip[16];
 
-	char mac[6];
-	short server_port[1];
-
-	char gateway[16];
-	char mask[16];
-	char server_ip[16];
-}RJ45_config_struct;
-RJ45_config_struct  RJ45_config;
+RJ45_config_struct  RJ45_config = {0};
 // #include "app/uart/debug_def.h"
 
 //spi_instance_t _net_core_spi;

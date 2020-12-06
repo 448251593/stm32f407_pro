@@ -3,13 +3,25 @@
 */
 #ifndef  _W5500_H_
 #define  _W5500_H_
-
+#include <stdint.h>
 typedef uint8_t 			SOCKET;
 
 #define CORESPI_net_ADDR   0x7D000000U
 #define net_core_spi  &_net_core_spi
 #define w5500_cs       SPI_SLAVE_1
+typedef struct 
+{
+	char local_ip[16];
 
+	char mac[6];
+	short server_port[1];
+
+	char gateway[16];
+	char mask[16];
+	char server_ip[16];
+	char  enable;
+}RJ45_config_struct;
+extern RJ45_config_struct  RJ45_config ;
 /**
  @brief Mode Register address
  * W5500 SPI Frame consists of 16bits Offset Address in Address Phase, 
