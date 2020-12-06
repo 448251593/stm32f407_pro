@@ -2,7 +2,8 @@
 #include "stdio.h"
 #include  "spi_adc_driver.h"
 #include  "spi_adc_app.h"
-
+#include "main.h"
+#include "tim9_driver.h"
 run_ctrl_struct     run_status_g = {0};
 
 void   spi_adc_init(void)
@@ -36,12 +37,12 @@ void  adc_read_deal(void)
 	{
 		run_status_g.status_s = 0;
 		ittt = spi_adc_read();
-		printf("adc read =%d\n", ittt);
+		LOG_INFO("adc read =%d\n", ittt);
 	}
 
 }
 #define      ADC_V_MAX_NUM    10000
-uint16_t    adc_v[ADC_V_MAX_NUM] = 0;
+uint16_t    adc_v[ADC_V_MAX_NUM] = {0};
 uint16_t    adc_v_index = 0;
 void   get_adc_data(void)
 {
@@ -56,7 +57,7 @@ void   get_adc_data(void)
 		{
 			run_status_g.status_s = 0;
 			adc_v_index = 0;
-			printf("end=%d\n", get_global_tick());
+			LOG_INFO("end=%d\n", get_global_tick());
 		}
 		
 	}
@@ -64,17 +65,17 @@ void   get_adc_data(void)
 void   print_adc_data(void)
 {
 	int i = 0;
-	printf("---\n");
+	LOG_INFO("---\n");
 	// printf("%04d,", adc_v[i]);
 	for (i = 1; i < ADC_V_MAX_NUM+1; i++)
 	{
-		printf("%04d,", adc_v[i-1]);
+		LOG_INFO("%04d,", adc_v[i-1]);
 		if (i % 20 == 0)
 		{
-			printf("\n");
+			LOG_INFO("\n");
 		}
 	}
-	printf("---\n");
+	LOG_INFO("---\n");
 }
 
 uint16_t   get_adc_data_finish(void)

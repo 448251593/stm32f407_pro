@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include "usart_driver.h"
 #include "spi_adc_app.h"
+#include "main.h"
+#include "tim9_driver.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 // #define   UART_SEDNTASK_STK_SIZE   128
@@ -139,6 +141,7 @@ uint8_t   usart3_recv_idle = 0;
 uint8_t  usart3_set_idle(void)
 {
     usart3_recv_idle = 1;
+		return  0;
 }
 uint8_t  usart3_parse_cmd(void)
 {
@@ -181,7 +184,7 @@ uint8_t  usart3_parse_cmd(void)
             {
                 extern void  adc_read_start(void);
                 adc_read_start();
-                printf("start=%d\n", get_global_tick());
+                LOG_INFO("start=%d\n", get_global_tick());
             }
             p2 =  strstr((p1+3),"read");
             if(p2)

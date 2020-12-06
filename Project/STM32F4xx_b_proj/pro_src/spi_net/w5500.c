@@ -19,6 +19,7 @@
 // #include "app/net/socket.h"
 #include "w5500.h"
 #include "protocol.h"
+#include "main.h"
 typedef struct 
 {
 	char local_ip[16];
@@ -321,7 +322,7 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	//  wait_ready();
 	SPI_clear_slave_select();
 	// if(addrbsb==Sn_CR(0))return 0;  //debug
-	printf("chip read=0x%02x\n", data[0]);
+	LOG_INFO("chip read=0x%02x\n", data[0]);
 	return data[0];
 }
 

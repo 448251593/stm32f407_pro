@@ -75,6 +75,7 @@ int main(void)
   uint32_t   tmp_count = 0;
 	gpio_init();
 	usart3_init();
+  printf("version info = %d.%d.%d\n", VERSION_MAIN_NUM, VERSION_SUB1_NUM,VERSION_SUB2_NUM);
 	sADC_Init();
 	timer9_driver_init();
 	W5500_net_init();
