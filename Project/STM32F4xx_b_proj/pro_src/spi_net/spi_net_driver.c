@@ -101,12 +101,14 @@ void sNET_Init(void)
   /*!< Deselect the NET: Chip Select high */
   sNET_CS_HIGH();
 
+
+
   /*!< SPI configuration */
   SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
   SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
   SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
-  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+  SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;//SPI_CPHA_1Edge;
   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
   SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
 
@@ -116,6 +118,149 @@ void sNET_Init(void)
 
   /*!< Enable the sNET_SPI  */
   SPI_Cmd(sNET_SPI, ENABLE);
+}
+
+
+
+/**
+  * @brief  Reads a byte from the SPI NET.
+  * @note   This function must be used only if the Start_Read_Sequence function
+  *         has been previously called.
+  * @param  None
+  * @retval Byte Read from the SPI NET.--ok
+  */
+uint8_t sNET_ReadByte(void)
+{
+  return (sNET_SendByte(sNET_DUMMY_BYTE));
+}
+
+/**
+  * @brief  Sends a byte through the SPI interface and return the byte received
+  *         from the SPI bus.
+  * @param  byte: byte to send.
+  * @retval The value of the received byte.--ok
+  */
+uint8_t sNET_SendByte(uint8_t byte)
+{
+  /*!< Loop while DR register in not empty */
+  while (SPI_I2S_GetFlagStatus(sNET_SPI, SPI_I2S_FLAG_TXE) == RESET);
+
+  /*!< Send byte through the SPI1 peripheral */
+  SPI_I2S_SendData(sNET_SPI, byte);
+
+  /*!< Wait to receive a byte */
+  while (SPI_I2S_GetFlagStatus(sNET_SPI, SPI_I2S_FLAG_RXNE) == RESET);
+
+  /*!< Return the byte read from the SPI bus */
+  return SPI_I2S_ReceiveData(sNET_SPI);
+}
+//add by bcg,2020-09-02 10:22:41
+
+// HAL_SPI_Transmit(&SpiHandle[1], (uint8_t *)&(fptr->tx),fptr->txnum,1000);
+// HAL_SPI_Receive(&SpiHandle[1], fptr->rx, fptr->rxnum,1000);
+void SPI_net_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *pBuffer_rx, uint16_t NumByteToRx)
+{
+	// while (NumByteToRead--) /*!< while there is data to be read */
+	// {
+	// 	/*!< Read a byte from the NET */
+	// 	*pBuffer = sNET_SendByte(sNET_DUMMY_BYTE);
+	// 	/*!< Point to the next location where the byte read will be saved */
+	// 	pBuffer++;
+	// }
+	while (NumByteToTx--)
+	{
+		sNET_SendByte(*pBuffer_tx++);
+	}
+
+	while (NumByteToRx--)
+	{
+		*pBuffer_rx = sNET_SendByte(sNET_DUMMY_BYTE);
+		/*!< Point to the next location where the byte read will be saved */
+		pBuffer_rx++;
+	}
+}
+/**
+  * @brief  Initializes the peripherals used by the SPI NET driver.
+  * @param  None
+  * @retval None
+  */
+void sNET_LowLevel_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  /*!< Enable the SPI clock */
+  sNET_SPI_CLK_INIT(sNET_SPI_CLK, ENABLE);
+
+  /*!< Enable GPIO clocks */
+  RCC_AHB1PeriphClockCmd(sNET_SPI_SCK_GPIO_CLK | sNET_SPI_MISO_GPIO_CLK |
+                         sNET_SPI_MOSI_GPIO_CLK | sNET_CS_GPIO_CLK, ENABLE);
+
+  /*!< SPI pins configuration *************************************************/
+
+  /*!< Connect SPI pins to AF5 */
+  GPIO_PinAFConfig(sNET_SPI_SCK_GPIO_PORT, sNET_SPI_SCK_SOURCE, sNET_SPI_SCK_AF);
+  GPIO_PinAFConfig(sNET_SPI_MISO_GPIO_PORT, sNET_SPI_MISO_SOURCE, sNET_SPI_MISO_AF);
+  GPIO_PinAFConfig(sNET_SPI_MOSI_GPIO_PORT, sNET_SPI_MOSI_SOURCE, sNET_SPI_MOSI_AF);
+
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
+
+  /*!< SPI SCK pin configuration */
+  GPIO_InitStructure.GPIO_Pin = sNET_SPI_SCK_PIN;
+  GPIO_Init(sNET_SPI_SCK_GPIO_PORT, &GPIO_InitStructure);
+
+  /*!< SPI MOSI pin configuration */
+  GPIO_InitStructure.GPIO_Pin =  sNET_SPI_MOSI_PIN;
+  GPIO_Init(sNET_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
+
+  /*!< SPI MISO pin configuration */
+  GPIO_InitStructure.GPIO_Pin =  sNET_SPI_MISO_PIN;
+  GPIO_Init(sNET_SPI_MISO_GPIO_PORT, &GPIO_InitStructure);
+
+  /*!< Configure sNET Card CS pin in output pushpull mode ********************/
+  GPIO_InitStructure.GPIO_Pin = sNET_CS_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(sNET_CS_GPIO_PORT, &GPIO_InitStructure);
+}
+
+/**
+  * @brief  DeInitializes the peripherals used by the SPI NET driver.
+  * @param  None
+  * @retval None
+  */
+void sNET_LowLevel_DeInit(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  /*!< Disable the sNET_SPI  ************************************************/
+  SPI_Cmd(sNET_SPI, DISABLE);
+
+  /*!< DeInitializes the sNET_SPI *******************************************/
+  SPI_I2S_DeInit(sNET_SPI);
+
+  /*!< sNET_SPI Periph clock disable ****************************************/
+  sNET_SPI_CLK_INIT(sNET_SPI_CLK, DISABLE);
+
+  /*!< Configure all pins used by the SPI as input floating *******************/
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+  GPIO_InitStructure.GPIO_Pin = sNET_SPI_SCK_PIN;
+  GPIO_Init(sNET_SPI_SCK_GPIO_PORT, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = sNET_SPI_MISO_PIN;
+  GPIO_Init(sNET_SPI_MISO_GPIO_PORT, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = sNET_SPI_MOSI_PIN;
+  GPIO_Init(sNET_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = sNET_CS_PIN;
+  GPIO_Init(sNET_CS_GPIO_PORT, &GPIO_InitStructure);
 }
 #if 0
 /**
@@ -452,149 +597,6 @@ void sNET_WaitForWriteEnd(void)
   sNET_CS_HIGH();
 }
 #endif
-
-
-/**
-  * @brief  Reads a byte from the SPI NET.
-  * @note   This function must be used only if the Start_Read_Sequence function
-  *         has been previously called.
-  * @param  None
-  * @retval Byte Read from the SPI NET.--ok
-  */
-uint8_t sNET_ReadByte(void)
-{
-  return (sNET_SendByte(sNET_DUMMY_BYTE));
-}
-
-/**
-  * @brief  Sends a byte through the SPI interface and return the byte received
-  *         from the SPI bus.
-  * @param  byte: byte to send.
-  * @retval The value of the received byte.--ok
-  */
-uint8_t sNET_SendByte(uint8_t byte)
-{
-  /*!< Loop while DR register in not empty */
-  while (SPI_I2S_GetFlagStatus(sNET_SPI, SPI_I2S_FLAG_TXE) == RESET);
-
-  /*!< Send byte through the SPI1 peripheral */
-  SPI_I2S_SendData(sNET_SPI, byte);
-
-  /*!< Wait to receive a byte */
-  while (SPI_I2S_GetFlagStatus(sNET_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-
-  /*!< Return the byte read from the SPI bus */
-  return SPI_I2S_ReceiveData(sNET_SPI);
-}
-//add by bcg,2020-09-02 10:22:41
-
-// HAL_SPI_Transmit(&SpiHandle[1], (uint8_t *)&(fptr->tx),fptr->txnum,1000);
-// HAL_SPI_Receive(&SpiHandle[1], fptr->rx, fptr->rxnum,1000);
-void SPI_net_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *pBuffer_rx, uint16_t NumByteToRx)
-{
-	// while (NumByteToRead--) /*!< while there is data to be read */
-	// {
-	// 	/*!< Read a byte from the NET */
-	// 	*pBuffer = sNET_SendByte(sNET_DUMMY_BYTE);
-	// 	/*!< Point to the next location where the byte read will be saved */
-	// 	pBuffer++;
-	// }
-	while (NumByteToTx--)
-	{
-		sNET_SendByte(*pBuffer_tx++);
-	}
-
-	while (NumByteToRx--)
-	{
-		*pBuffer_rx = sNET_SendByte(sNET_DUMMY_BYTE);
-		/*!< Point to the next location where the byte read will be saved */
-		pBuffer_rx++;
-	}
-}
-/**
-  * @brief  Initializes the peripherals used by the SPI NET driver.
-  * @param  None
-  * @retval None
-  */
-void sNET_LowLevel_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  /*!< Enable the SPI clock */
-  sNET_SPI_CLK_INIT(sNET_SPI_CLK, ENABLE);
-
-  /*!< Enable GPIO clocks */
-  RCC_AHB1PeriphClockCmd(sNET_SPI_SCK_GPIO_CLK | sNET_SPI_MISO_GPIO_CLK |
-                         sNET_SPI_MOSI_GPIO_CLK | sNET_CS_GPIO_CLK, ENABLE);
-
-  /*!< SPI pins configuration *************************************************/
-
-  /*!< Connect SPI pins to AF5 */
-  GPIO_PinAFConfig(sNET_SPI_SCK_GPIO_PORT, sNET_SPI_SCK_SOURCE, sNET_SPI_SCK_AF);
-  GPIO_PinAFConfig(sNET_SPI_MISO_GPIO_PORT, sNET_SPI_MISO_SOURCE, sNET_SPI_MISO_AF);
-  GPIO_PinAFConfig(sNET_SPI_MOSI_GPIO_PORT, sNET_SPI_MOSI_SOURCE, sNET_SPI_MOSI_AF);
-
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
-
-  /*!< SPI SCK pin configuration */
-  GPIO_InitStructure.GPIO_Pin = sNET_SPI_SCK_PIN;
-  GPIO_Init(sNET_SPI_SCK_GPIO_PORT, &GPIO_InitStructure);
-
-  /*!< SPI MOSI pin configuration */
-  GPIO_InitStructure.GPIO_Pin =  sNET_SPI_MOSI_PIN;
-  GPIO_Init(sNET_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
-
-  /*!< SPI MISO pin configuration */
-  GPIO_InitStructure.GPIO_Pin =  sNET_SPI_MISO_PIN;
-  GPIO_Init(sNET_SPI_MISO_GPIO_PORT, &GPIO_InitStructure);
-
-  /*!< Configure sNET Card CS pin in output pushpull mode ********************/
-  GPIO_InitStructure.GPIO_Pin = sNET_CS_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(sNET_CS_GPIO_PORT, &GPIO_InitStructure);
-}
-
-/**
-  * @brief  DeInitializes the peripherals used by the SPI NET driver.
-  * @param  None
-  * @retval None
-  */
-void sNET_LowLevel_DeInit(void)
-{
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  /*!< Disable the sNET_SPI  ************************************************/
-  SPI_Cmd(sNET_SPI, DISABLE);
-
-  /*!< DeInitializes the sNET_SPI *******************************************/
-  SPI_I2S_DeInit(sNET_SPI);
-
-  /*!< sNET_SPI Periph clock disable ****************************************/
-  sNET_SPI_CLK_INIT(sNET_SPI_CLK, DISABLE);
-
-  /*!< Configure all pins used by the SPI as input floating *******************/
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-
-  GPIO_InitStructure.GPIO_Pin = sNET_SPI_SCK_PIN;
-  GPIO_Init(sNET_SPI_SCK_GPIO_PORT, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = sNET_SPI_MISO_PIN;
-  GPIO_Init(sNET_SPI_MISO_GPIO_PORT, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = sNET_SPI_MOSI_PIN;
-  GPIO_Init(sNET_SPI_MOSI_GPIO_PORT, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = sNET_CS_PIN;
-  GPIO_Init(sNET_CS_GPIO_PORT, &GPIO_InitStructure);
-}
-
 /**
   * @}
   */

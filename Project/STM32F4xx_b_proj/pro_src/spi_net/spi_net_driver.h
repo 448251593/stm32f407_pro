@@ -52,7 +52,7 @@
 
 #define sNET_WIP_FLAG           0x01  /* Write In Progress (WIP) flag */
 
-#define sNET_DUMMY_BYTE         0xA5
+#define sNET_DUMMY_BYTE         0xA5a5
 #define sNET_SPI_PAGESIZE       0x100
 
 #define sNET_M25P128_ID         0x202018

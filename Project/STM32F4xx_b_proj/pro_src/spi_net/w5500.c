@@ -19,7 +19,18 @@
 // #include "app/net/socket.h"
 #include "w5500.h"
 #include "protocol.h"
+typedef struct 
+{
+	char local_ip[16];
 
+	char mac[6];
+	short server_port[1];
+
+	char gateway[16];
+	char mask[16];
+	char server_ip[16];
+}RJ45_config_struct;
+RJ45_config_struct  RJ45_config;
 // #include "app/uart/debug_def.h"
 
 //spi_instance_t _net_core_spi;
@@ -38,7 +49,7 @@ static uint16_t RSIZE[8]; /**< Max Rx buffer size by each channel */
 uint8_t txsize[8] = {4, 2, 2, 2, 2, 1, 1, 2};
 uint8_t rxsize[8] = {4, 2, 2, 2, 2, 1, 1, 2};
 
-void W5500_net_init()
+void W5500_net_init(void)
 {
 
 	//   MSS_GPIO_set_output(rst_W5500,0);
@@ -50,7 +61,7 @@ void W5500_net_init()
 	SPI_init(net_core_spi, CORESPI_net_ADDR, 32);
 	SPI_configure_master_mode(net_core_spi);
 #else
-	//sNET_Init();
+	sNET_Init();
 #endif
 
 	// socket_state = Disconnect;
@@ -62,7 +73,7 @@ void W5500_net_init()
 void set_netpara_default()
 {
 	uint8_t i;
-#if  0
+#if  1
 	RJ45_config.server_port[0] = default_server_port[0];
 
 	for (i = 0; i < 6; i++)
@@ -81,7 +92,7 @@ void set_netpara_default()
 uint8_t  ascii_2_uint(uint8_t *pd,uint8_t n)
 {
 
-	return 0;
+	return *pd - '0';
 }
 void get_int_from_string(uint8_t *uint, uint8_t *config, uint8_t num)
 {
@@ -146,7 +157,7 @@ uint8_t ascii_2_hex(uint8_t *cdata, uint8_t num) //֧��2�ֽ�ASCII��
 void get_hex_from_string(uint8_t *uint, uint8_t *config, uint8_t num)
 {
 	uint8_t i, j, cdata[5];
-	uint32_t data = 0;
+	//uint32_t data = 0;
 	for (i = 0; i < num; i++)
 	{
 		for (j = 0; j < 5; j++)
@@ -215,7 +226,7 @@ void NetInit(void)
 	//	set_netpara_default();
 	i = getVersion();
 	//	debug("netVer",i);
-	#if 0
+	#if 1
 	for (i = 0; i < 6; i++)
 		tmp_data[i] = RJ45_config.mac[i];
 	setSHAR(tmp_data); /*����Mac��ַ*/
@@ -310,6 +321,7 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	//  wait_ready();
 	SPI_clear_slave_select();
 	// if(addrbsb==Sn_CR(0))return 0;  //debug
+	printf("chip read=0x%02x\n", data[0]);
 	return data[0];
 }
 

@@ -35,6 +35,7 @@
 #include "spi_adc_app.h"
 #include "tim9_driver.h"
 #include "stdio.h"
+#include "w5500.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -76,6 +77,7 @@ int main(void)
 	usart3_init();
 	sADC_Init();
 	timer9_driver_init();
+	W5500_net_init();
 	/* SysTick end of count event each 10ms */
 	RCC_GetClocksFreq(&RCC_Clocks);
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
@@ -103,7 +105,7 @@ int main(void)
     if(get_global_tick() - tmp_count >= 1000*1000)
     {
         tmp_count = get_global_tick();
-		printf("tmp_count=%d",tmp_count);
+				//printf("tmp_count=%d",tmp_count);
     }
     // if( i  == 0)
 		// {

@@ -403,6 +403,6 @@ void setSn_IR(uint8_t s, uint8_t val);
  *  IINCHIP_WRITE(WIZCHIP_OFFSET_INC(RTR0,1)); 
  */
 //#define WIZCHIP_OFFSET_INC(ADDR, N)    (ADDR + (N<<8)) //< Increase offset address
-
+void W5500_net_init(void);
 
 #endif
