@@ -40,14 +40,15 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t aTxBuffer[BUFFERSIZE] = "123456";
+uint8_t aTxBuffer[BUFFERSIZE] ;
 __IO uint16_t aTxBuffer_datalen = 0x00;
 
-uint8_t aRxBuffer [BUFFERSIZE];
-__IO uint8_t ubRxIndex = 0x00;
-__IO uint8_t ubTxIndex = 0x00;
+  DMA_InitTypeDef  DMA_InitStructure;
+// uint8_t aRxBuffer [BUFFERSIZE];
+// __IO uint8_t ubRxIndex = 0x00;
+// __IO uint8_t ubTxIndex = 0x00;
 __IO uint32_t TimeOut = 0x00;  
-
+void usart3_dma_start(void);
 /* Private function prototypes -----------------------------------------------*/
 static void USART_Config(void);
 // static void SysTickConfig(void);
@@ -90,8 +91,11 @@ int usart3_init(void)
   // /* Wait until Tamper Button is pressed */
   // while (STM_EVAL_PBGetState(BUTTON_TAMPER));  
   
+  #if  USART_DMA_TX_ENABEL
+  #else
   /* Enable the Tx buffer empty interrupt */
   USART_ITConfig(USARTx, USART_IT_TXE, ENABLE);
+  #endif
   
 // #endif /* USART_TRANSMITTER */
   
@@ -109,12 +113,13 @@ int usart3_init(void)
   * @param  None
   * @retval None
   */
+
 static void USART_Config(void)
 {
   USART_InitTypeDef USART_InitStructure;
   NVIC_InitTypeDef NVIC_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure;
-  
+
   /* Enable GPIO clock */
   RCC_AHB1PeriphClockCmd(USARTx_TX_GPIO_CLK | USARTx_RX_GPIO_CLK, ENABLE);
   
@@ -164,7 +169,60 @@ static void USART_Config(void)
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
   USART_Init(USARTx, &USART_InitStructure);
+
+
+  #if  USART_DMA_TX_ENABEL
+
+  /* Enable the DMA clock */
+  RCC_AHB1PeriphClockCmd(USARTx_DMAx_CLK, ENABLE);
+
+  /* Configure DMA Initialization Structure */
+  DMA_InitStructure.DMA_BufferSize = BUFFERSIZE ;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable ;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull ;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single ;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_PeripheralBaseAddr =(uint32_t) (&(USARTx->DR)) ;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  /* Configure TX DMA */
+  DMA_InitStructure.DMA_Channel = USARTx_TX_DMA_CHANNEL;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)aTxBuffer;
+  DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
+
+  // /* Configure RX DMA */
+  // DMA_InitStructure.DMA_Channel = USARTx_RX_DMA_CHANNEL ;
+  // DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory ;
+  // DMA_InitStructure.DMA_Memory0BaseAddr =(uint32_t)aRxBuffer ;
+  // DMA_Init(USARTx_RX_DMA_STREAM,&DMA_InitStructure);
+   /* Enable DMA USART TX Stream */
+    /* Enable USART */
   
+
+    /* Configure the Priority Group to 2 bits */
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+  
+  /* Enable the USARTx Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = USARTx_DMA_TX_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  DMA_ITConfig(USARTx_TX_DMA_STREAM, DMA_IT_TC, ENABLE);
+   
+  USART_Cmd(USARTx, ENABLE);
+
+
+//   usart3_dma_start();
+
+#else
+
   /* NVIC configuration */
   /* Configure the Priority Group to 2 bits */
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -178,9 +236,52 @@ static void USART_Config(void)
   
   /* Enable USART */
   USART_Cmd(USARTx, ENABLE);
+  #endif
+
 }
+  #if  USART_DMA_TX_ENABEL
+void usart3_dma_start(void)
+{
+  /* Enable DMA USART TX Stream */
+  DMA_Cmd(USARTx_TX_DMA_STREAM,ENABLE);
+  /* Enable USART DMA TX Requsts */
+  USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
 
-
+  // /* Waiting the end of Data transfer */
+  // while (USART_GetFlagStatus(USARTx,USART_FLAG_TC)==RESET);    
+  // while (DMA_GetFlagStatus(USARTx_TX_DMA_STREAM,USARTx_TX_DMA_FLAG_TCIF)==RESET);
+  
+  // /* Clear DMA Transfer Complete Flags */
+  // DMA_ClearFlag(USARTx_TX_DMA_STREAM,USARTx_TX_DMA_FLAG_TCIF);
+  // /* Clear USART Transfer Complete Flags */
+  // USART_ClearFlag(USARTx,USART_FLAG_TC);  
+}
+//add by bcg,2020-12-14 23:54:12 dma usart3 发送完成中断处理,如果没有新的数据就不用再发送
+void DMA1_Stream3_IRQHandler(void)
+{
+  uint16_t   tmp_len;
+  if (DMA_GetITStatus(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3) == SET)
+	{
+    DMA_ClearITPendingBit(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3);
+		// if (usart3_get_fifo(&aTxBuffer[0]))
+    tmp_len = usart3_dma_get_fifo_data(aTxBuffer, BUFFERSIZE);
+		if (tmp_len > 0)
+		{
+       DMA_InitStructure.DMA_BufferSize = tmp_len ;
+       DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
+			/* Send Transaction data */
+			// USART_SendData(USARTx, tmp);
+			//  USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
+       usart3_dma_start();
+		}
+		else
+		{
+			/* Disable the Tx buffer empty interrupt */
+			//  USART_DMACmd(USARTx, USART_DMAReq_Tx, DISABLE);
+		}
+	}
+}
+#endif
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
@@ -230,22 +331,25 @@ void USART3_IRQHandler_deal(void)
 		// 	//   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
 		// }
 	}
-	/* USART in Transmitter mode */
-	if (USART_GetITStatus(USARTx, USART_IT_TXE) == SET)
-	{
-		if (usart3_get_fifo(&tmp))
-		{
-			/* Send Transaction data */
-			USART_SendData(USARTx, tmp);
-		}
-		else
-		{
-			/* Disable the Tx buffer empty interrupt */
-			USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
-		}
-	}
-	
-	if (USART_GetITStatus(USARTx, USART_IT_IDLE) == SET)
+#if USART_DMA_TX_ENABEL
+#else
+  /* USART in Transmitter mode */
+  if (USART_GetITStatus(USARTx, USART_IT_TXE) == SET)
+  {
+    if (usart3_get_fifo(&tmp))
+    {
+      /* Send Transaction data */
+      USART_SendData(USARTx, tmp);
+    }
+    else
+    {
+      /* Disable the Tx buffer empty interrupt */
+      USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
+    }
+  }
+#endif
+
+  if (USART_GetITStatus(USARTx, USART_IT_IDLE) == SET)
 	{
 		//空闲中断
 		usart3_set_idle();
@@ -257,47 +361,16 @@ void USART3_IRQHandler_deal(void)
 
 void usart3_driver_send_enable(void)
 {
+#if USART_DMA_TX_ENABEL
+	usart3_dma_start();
+#else
 	USART_ITConfig(USARTx, USART_IT_TXE, ENABLE);
+#endif
 }
 
 
-/**
-  * @brief  Compares two buffers.
-  * @param  pBuffer1, pBuffer2: buffers to be compared.
-  * @param  BufferLength: buffer's length
-  * @retval PASSED: pBuffer1 identical to pBuffer2
-  *         FAILED: pBuffer1 differs from pBuffer2
-  */
-static TestStatus Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-{
-  while (BufferLength--)
-  {
-    if (*pBuffer1 != *pBuffer2)
-    {
-      return FAILED;
-    }
-    pBuffer1++;
-    pBuffer2++;
-  }
-  
-  return PASSED;
-}
 
-void uart3_data_poll(void)
-{
-    if (Buffercmp(aTxBuffer, aRxBuffer, ubRxIndex) != FAILED)
-    {
-      /* Turn ON LED2 */
-    //   STM_EVAL_LEDOn(LED2);
-		led_on(LED_O);
-    }
-    else
-    {
-      /* Turn ON LED3 */
-    //   STM_EVAL_LEDOn(LED3);
-		led_on(LED_Y);
-    }
-}
+
 /**
   * @}
   */

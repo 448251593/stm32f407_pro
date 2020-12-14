@@ -124,7 +124,9 @@ extern __IO uint8_t ubUsartMode;
 
 /* Misc definition ************************************************************/
 /* Transmit buffer size */
-#define BUFFERSIZE                       100
+#define BUFFERSIZE                       					256
+#define USART_DMA_TX_ENABEL                       1
+
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/

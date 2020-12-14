@@ -35,8 +35,8 @@
 
 
 #if  UART1EN > 0
-FT_FIFO              Uart1Fifo;
-unsigned char        Uart1SndBuf[UART1_BUF_SIZE];
+FT_FIFO              Usart3Fifo;
+unsigned char        Usart3SndBuf[UART1_BUF_SIZE];
 FT_FIFO              Usart3RxFifo;
 unsigned char        Usart3RxBuf[USART1_REC_BUF_SIZE];
 #endif
@@ -64,7 +64,7 @@ unsigned int Uart4DataParse(FT_FIFO *Ptrfifo);
 void  UartFifoInit(void)
 {
 #if  UART1EN > 0
-    ft_fifo_init(&Uart1Fifo, Uart1SndBuf, UART1_BUF_SIZE);
+    ft_fifo_init(&Usart3Fifo, Usart3SndBuf, UART1_BUF_SIZE);
     ft_fifo_init(&Usart3RxFifo, Usart3RxBuf, USART1_REC_BUF_SIZE);
 #endif
 
@@ -89,15 +89,15 @@ void   Usart3SendData(char *p, uint16_t len)
     // CPU_CRITICAL_ENTER();
 
 
-    templen = ft_fifo_getlenth(&Uart1Fifo);
+    templen = ft_fifo_getlenth(&Usart3Fifo);
 
     if (len + templen <= UART1_BUF_SIZE - 1)
     {
-        ft_fifo_put(&Uart1Fifo,(unsigned char *) p, len);
+        ft_fifo_put(&Usart3Fifo,(unsigned char *) p, len);
     }
     // CPU_CRITICAL_EXIT();
 
-    if (ft_fifo_getlenth(&Uart1Fifo) > 0)
+    if (ft_fifo_getlenth(&Usart3Fifo) > 0)
     {
         // USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //开启中断发送 使能
         usart3_driver_send_enable();
@@ -106,9 +106,9 @@ void   Usart3SendData(char *p, uint16_t len)
 uint8_t usart3_get_fifo(uint8_t *pdata)
 {
     unsigned char   tempchar;
-    if (ft_fifo_getlenth(&Uart1Fifo) > 0) //缓冲区有数据
+    if (ft_fifo_getlenth(&Usart3Fifo) > 0) //缓冲区有数据
     {
-        ft_fifo_get(&Uart1Fifo, &tempchar, 0, 1);
+        ft_fifo_get(&Usart3Fifo, &tempchar, 0, 1);
         *pdata = tempchar;
         // USART_SendData(USART1, tempchar);
         return 1;
@@ -134,6 +134,29 @@ uint8_t  isdigit_check(char *str)
         }
     }
     return 1;
+}
+uint16_t  usart3_dma_get_fifo_data(uint8_t *pout, uint16_t  size)
+{
+    uint16_t iBuffLen = 0;
+    FT_FIFO *Ptrfifo = &Usart3Fifo;
+    iBuffLen = ft_fifo_getlenth(Ptrfifo);
+    char *p1, *p2;
+
+    if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
+    {
+        if (iBuffLen <= size)
+        {
+            ft_fifo_get(Ptrfifo, (fifo_u8 *)pout, 0, iBuffLen);
+            return iBuffLen;
+        }
+        else
+        {
+            ft_fifo_get(Ptrfifo, (fifo_u8 *)pout, 0, size);
+            return size;
+        }
+        
+    } 
+    return 0;
 }
 uint8_t   cmdbuf[128];
 uint32_t  param = 0;
