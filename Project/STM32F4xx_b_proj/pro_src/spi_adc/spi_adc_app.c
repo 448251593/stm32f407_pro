@@ -4,8 +4,10 @@
 #include  "spi_adc_app.h"
 #include "main.h"
 #include "tim9_driver.h"
+#include "usart_app.h"
 run_ctrl_struct     run_status_g = {0};
-
+static uint32_t last_time_ticks = 0;
+static uint32_t all_time_ticks = 0;
 void   spi_adc_init(void)
 {
 
@@ -30,6 +32,7 @@ uint16_t spi_adc_read(void)
 void  adc_read_start(void)
 {
 	run_status_g.status_s = 1;
+	all_time_ticks = get_global_tick();
 }
 void  adc_read_deal(void)
 {
@@ -41,7 +44,7 @@ void  adc_read_deal(void)
 	}
 
 }
-#define      ADC_V_MAX_NUM    10000
+#define      ADC_V_MAX_NUM    10
 uint16_t    adc_v[ADC_V_MAX_NUM] = {0};
 uint16_t    adc_v_index = 0;
 void   get_adc_data(void)
@@ -58,6 +61,42 @@ void   get_adc_data(void)
 			run_status_g.status_s = 0;
 			adc_v_index = 0;
 			LOG_INFO("end=%d\n", get_global_tick());
+		}
+		
+	}
+}
+
+uint32_t  temp_tick;
+uint16_t  sample_nums_count = 0;
+void   get_adc_data_200khz(void)
+{
+
+	//uint16_t   adc_t = 0;
+	uint8_t   sdt_ch[3] = {0};
+	if (run_status_g.status_s == 1)
+	{
+		// sdt_ch[2] = ',0'?
+		temp_tick = get_global_tick();
+		if(temp_tick - last_time_ticks >= 5)
+		{
+			last_time_ticks = temp_tick;
+			*((uint16_t *)sdt_ch) = spi_adc_read();
+			Usart3SendData((char*)sdt_ch, 3);
+
+			//add by bcg,2020-12-15 22:54:03 大于等于3000个数据,启动dma
+			sample_nums_count++;
+			if(sample_nums_count>=BUFFERSIZE/2)
+			{
+				sample_nums_count = 0;
+				usart3send_flush();
+				//run_status_g.status_s = 0;
+			}
+		}
+
+
+		if(temp_tick - all_time_ticks >= 1000000)
+		{
+			run_status_g.status_s = 0;
 		}
 		
 	}

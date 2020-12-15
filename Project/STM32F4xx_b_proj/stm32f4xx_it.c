@@ -157,7 +157,7 @@ void SysTick_Handler(void)
 * @param  None
 * @retval None
 */
-void USARTx_IRQHandler(void)
+void USART3_IRQHandler(void)
 {
 	// data_recv_usart();
   USART3_IRQHandler_deal();
@@ -177,6 +177,16 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 {
 	TIM9_IRQHandler_s();
 }
+
+void DMA1_Stream4_IRQHandler(void)
+{
+  // if(DMA_GetFlagStatus(DMA_FLAG_TCIF4))
+  // {
+  //   DMA_ClearITPendingBit(DMA_IT_HT);
+  // }
+}
+
+
 /**
   * @brief  This function handles SPI interrupt request.
   * @param  None

@@ -33,6 +33,7 @@
 #include "stm32f4xx.h"
 #include "spi_net_driver.h"
 #include "usart_driver.h"
+#include "usart_app.h"
 #define countof(a)   (sizeof(a) / sizeof(*(a)))
 	
 
@@ -44,7 +45,7 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 #define    VERSION_MAIN_NUM      1
 #define    VERSION_SUB1_NUM      0
 #define    VERSION_SUB2_NUM      1
-#define    LOG_INFO(  ... ) printf(  __VA_ARGS__ )
+#define    LOG_INFO(  ... )    //do{printf(  __VA_ARGS__ );usart3send_flush();}while(0);
 /* Exported functions ------------------------------------------------------- */
 void TimingDelay_Decrement(void);
 

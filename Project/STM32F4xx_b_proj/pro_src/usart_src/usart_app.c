@@ -96,13 +96,17 @@ void   Usart3SendData(char *p, uint16_t len)
         ft_fifo_put(&Usart3Fifo,(unsigned char *) p, len);
     }
     // CPU_CRITICAL_EXIT();
+}
 
+void  usart3send_flush(void)
+{
     if (ft_fifo_getlenth(&Usart3Fifo) > 0)
     {
         // USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //开启中断发送 使能
         usart3_driver_send_enable();
-    }
+    } 
 }
+
 uint8_t usart3_get_fifo(uint8_t *pdata)
 {
     unsigned char   tempchar;
@@ -144,21 +148,23 @@ uint16_t  usart3_dma_get_fifo_data(uint8_t *pout, uint16_t  size)
 
     if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
     {
+        memset(pout, 0, size);
         if (iBuffLen <= size)
         {
             ft_fifo_get(Ptrfifo, (fifo_u8 *)pout, 0, iBuffLen);
+
             return iBuffLen;
         }
         else
         {
             ft_fifo_get(Ptrfifo, (fifo_u8 *)pout, 0, size);
+       
             return size;
         }
-        
     } 
     return 0;
 }
-uint8_t   cmdbuf[128];
+uint8_t   cmdbuf[48];
 uint32_t  param = 0;
 uint8_t   usart3_recv_idle = 0;
 uint8_t  usart3_set_idle(void)
@@ -207,7 +213,7 @@ uint8_t  usart3_parse_cmd(void)
             {
                 extern void  adc_read_start(void);
                 adc_read_start();
-                LOG_INFO("start=%d\n", get_global_tick());
+                //LOG_INFO("start=%d\n", get_global_tick());
             }
             p2 =  strstr((p1+3),"read");
             if(p2)

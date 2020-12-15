@@ -189,7 +189,7 @@ void TIM_Config(void)
   * @retval None
   */
 static __IO uint32_t timer_tick_ms_g = 0;
-uint32_t   count_test = 0;
+// uint32_t   count_test = 0;
 
 
 void TIM9_IRQHandler_s(void)
@@ -200,14 +200,15 @@ void TIM9_IRQHandler_s(void)
     TIM_ClearITPendingBit(TIM9, TIM_IT_CC1);
     capture = TIM_GetCapture1(TIM9);
     TIM_SetCompare1(TIM9, capture + CCR1_Val);
-	count_test++;
-	if(count_test== 2*500)//add by bcg,2020-12-02 21:19:57 1000
-	{
-		count_test = 0;
-		// led_toggle(LED_Y);
-		// get_adc_data();
+	// count_test++;
+	// if(count_test== 2*500)//add by bcg,2020-12-02 21:19:57 1000
+	// {
+	// 	count_test = 0;
+	// 	// led_toggle(LED_Y);
+	// 	// get_adc_data();
 
-	}
+	// }
+  
   	timer_tick_ms_g++;
   }
 

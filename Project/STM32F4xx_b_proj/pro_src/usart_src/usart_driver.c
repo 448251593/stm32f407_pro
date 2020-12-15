@@ -214,6 +214,12 @@ static void USART_Config(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
+
+  NVIC_InitStructure.NVIC_IRQChannel = USARTx_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
   DMA_ITConfig(USARTx_TX_DMA_STREAM, DMA_IT_TC, ENABLE);
    
   USART_Cmd(USARTx, ENABLE);
@@ -240,12 +246,29 @@ static void USART_Config(void)
 
 }
   #if  USART_DMA_TX_ENABEL
+
+  void  usart3_dma_set_buf_data(void)
+  {
+	 uint16_t   tmp_len;
+	 tmp_len = usart3_dma_get_fifo_data(aTxBuffer, BUFFERSIZE);
+	 if (tmp_len > 0)
+	 {
+		 DMA_Cmd(USARTx_TX_DMA_STREAM, DISABLE);
+		 DMA_InitStructure.DMA_BufferSize = tmp_len;
+		 DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
+	 }
+  }
+uint8_t   dma_complete_flag = 0;
 void usart3_dma_start(void)
 {
-  /* Enable DMA USART TX Stream */
-  DMA_Cmd(USARTx_TX_DMA_STREAM,ENABLE);
-  /* Enable USART DMA TX Requsts */
-  USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
+	if(dma_complete_flag==0)
+	{
+		dma_complete_flag = 1;
+		/* Enable DMA USART TX Stream */
+		DMA_Cmd(USARTx_TX_DMA_STREAM, ENABLE);
+		/* Enable USART DMA TX Requsts */
+		USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
+	}
 
   // /* Waiting the end of Data transfer */
   // while (USART_GetFlagStatus(USARTx,USART_FLAG_TC)==RESET);    
@@ -262,17 +285,17 @@ void DMA1_Stream3_IRQHandler(void)
   uint16_t   tmp_len;
   if (DMA_GetITStatus(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3) == SET)
 	{
-    DMA_ClearITPendingBit(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3);
+    	DMA_ClearITPendingBit(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3);
+		dma_complete_flag = 0;
 		// if (usart3_get_fifo(&aTxBuffer[0]))
-    tmp_len = usart3_dma_get_fifo_data(aTxBuffer, BUFFERSIZE);
+    	tmp_len = usart3_dma_get_fifo_data(aTxBuffer, BUFFERSIZE);
 		if (tmp_len > 0)
 		{
-       DMA_InitStructure.DMA_BufferSize = tmp_len ;
-       DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
-			/* Send Transaction data */
-			// USART_SendData(USARTx, tmp);
-			//  USART_DMACmd(USARTx, USART_DMAReq_Tx, ENABLE);
-       usart3_dma_start();
+			DMA_Cmd(USARTx_TX_DMA_STREAM, DISABLE);
+			DMA_InitStructure.DMA_BufferSize = tmp_len ;
+			DMA_Init(USARTx_TX_DMA_STREAM, &DMA_InitStructure);
+	// 		/* Send Transaction data */
+       		usart3_dma_start();
 		}
 		else
 		{
@@ -319,17 +342,6 @@ void USART3_IRQHandler_deal(void)
 	{
 		tmp = USART_ReceiveData(USARTx);
 		usart3_put_fifo(tmp);
-		// if (ubRxIndex < BUFFERSIZE)
-		// {
-		// 	/* Receive Transaction data */
-		// 	aRxBuffer[ubRxIndex++] = USART_ReceiveData(USARTx);
-		// }
-		// else
-		// {
-		// 	TimeOut++;
-		// 	/* Disable the Rx buffer not empty interrupt */
-		// 	//   USART_ITConfig(USARTx, USART_IT_RXNE, DISABLE);
-		// }
 	}
 #if USART_DMA_TX_ENABEL
 #else

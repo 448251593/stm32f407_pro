@@ -76,6 +76,7 @@ int main(void)
 	gpio_init();
 	usart3_init();
   printf("version info = %d.%d.%d\n", VERSION_MAIN_NUM, VERSION_SUB1_NUM,VERSION_SUB2_NUM);
+  usart3send_flush();
 	sADC_Init();
 	timer9_driver_init();
 	W5500_net_init();
@@ -95,6 +96,7 @@ int main(void)
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
+    tmp_count = get_global_tick();
 		// led_toggle(LED_Y);
 		// led_toggle(LED_O);
     // tmp_count++;
@@ -102,12 +104,20 @@ int main(void)
 		//uart3_data_poll();
 		// spi_adc_read();
 		// adc_read_deal();
-    get_adc_data();
-    if(get_global_tick() - tmp_count >= 1000*1000)
+    // get_adc_data();
+    get_adc_data_200khz();
+    
+    if(tmp_count % (1000*1000) == 0)
     {
-        tmp_count = get_global_tick();
-				//printf("tmp_count=%d",tmp_count);
+      led_toggle(LED_Y);
+      led_toggle(LED_O);
+        // tmp_count = get_global_tick();
+        // spi_adc_read();
+				// printf("tmp_count=%d",tmp_count);
+        // usart3send_flush();
     }
+
+
     // if( i  == 0)
 		// {
 		// 	 i = 1;
