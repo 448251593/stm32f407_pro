@@ -161,13 +161,21 @@ void get_hex_from_string(uint8_t *uint, uint8_t *config, uint8_t num)
 		*uint++ = ascii_2_hex(cdata, j);
 	}
 }
-
+typedef enum
+{
+	server_ip = 0,
+	local_ip,
+	server_port,
+	mac_addr,
+	gate_way,
+	sub_ETH_end,
+};
 void set_rj45_config(uint8_t *config)
 {
 	#if 0
 	uint32_t i = 0, cmd_eth_type;
 	uint8_t *bak;
-	if (!strncmp("dev_para", config, strlen("dev_para")))
+	if (!strncmp("dev_para", (const char*)config, strlen("dev_para")))
 	{
 		config = config + strlen("dev_para");
 		bak = config;
@@ -217,7 +225,7 @@ void NetInit(void)
 	//	set_netpara_default();
 	i = getVersion();
 	//	debug("netVer",i);
-	#if 1
+
 	for (i = 0; i < 6; i++)
 		tmp_data[i] = RJ45_config.mac[i];
 	setSHAR(tmp_data); /*����Mac��ַ*/
@@ -232,7 +240,7 @@ void NetInit(void)
 
 	for (i = 0; i < 4; i++)
 		tmp_data[i] = RJ45_config.gateway[i];
-#endif
+
 	setGAR(tmp_data); /*����Ĭ������*/
 
 	getSHAR(tmp_data);

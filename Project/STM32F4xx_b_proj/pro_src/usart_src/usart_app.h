@@ -16,7 +16,7 @@
 #define   UART_BUF_SIZE       100
 
 #define   UART1_BUF_SIZE      10240//
-#define   USART1_REC_BUF_SIZE      1024//
+#define   USART1_REC_BUF_SIZE      128//
 
 #define   UART2_BUF_SIZE      500//
 

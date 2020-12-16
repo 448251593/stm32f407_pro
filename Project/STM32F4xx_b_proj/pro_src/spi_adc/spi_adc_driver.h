@@ -60,6 +60,8 @@
 #define sADC_M25P128_ID         0x202018
 #define sADC_M25P64_ID          0x202017
 
+#define sADC_GPIOA_PORT_CAT(PARAM)         PARAM_ ## GPIOA
+
 /* M25P NET SPI Interface pins  */
 #define sADC_SPI                           SPI1
 #define sADC_SPI_CLK                       RCC_APB2Periph_SPI1//RCC_APB1Periph_SPI2
@@ -87,13 +89,13 @@
 #define sADC_CS_GPIO_PORT                  GPIOA
 #define sADC_CS_GPIO_CLK                   RCC_AHB1Periph_GPIOA
 //---------------------------dma-----------------------------------------------
-// #define sADC_SPI_DMA                       DMA1
-#define sADC_SPI_DMA_CLK                   RCC_AHB1Periph_DMA1
-#define sADC_SPI_TX_DMA_CHANNEL            DMA_Channel_0
-#define sADC_SPI_TX_DMA_STREAM             DMA1_Stream4
+#define sADC_SPI_DMA                       DMA2
+#define sADC_SPI_DMA_CLK                   RCC_AHB1Periph_DMA2
+#define sADC_SPI_TX_DMA_CHANNEL            DMA_Channel_3
+#define sADC_SPI_TX_DMA_STREAM             DMA1_Stream3
 #define sADC_SPI_TX_DMA_FLAG_TCIF          DMA_FLAG_TCIF4
-#define sADC_SPI_RX_DMA_CHANNEL            DMA_Channel_0
-#define sADC_SPI_RX_DMA_STREAM             DMA1_Stream3
+#define sADC_SPI_RX_DMA_CHANNEL            DMA_Channel_3
+#define sADC_SPI_RX_DMA_STREAM             DMA1_Stream2
 #define sADC_SPI_RX_DMA_FLAG_TCIF          DMA_FLAG_TCIF3
 
 /* Exported macro ------------------------------------------------------------*/

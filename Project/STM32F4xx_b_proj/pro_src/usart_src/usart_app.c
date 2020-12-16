@@ -1,9 +1,9 @@
 /******************** (C) COPYRIGHT 2010 STMicroelectronics ********************
 * File Name          : RECDATADEALTASK.c
-* Author             : ±Ï¹¤
+* Author             : æ¯•å·¥
 * Version            : V1.0.0
 * Date               : 20130607
-* Description        : ´®¿Ú½ÓÊÕÊı¾İ´¦ÀíÈÎÎñ
+* Description        : ä¸²å£æ¥æ”¶æ•°æ®å¤„ç†ä»»åŠ¡
 *******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
@@ -29,7 +29,7 @@
 // OS_TCB   UartSendTaskTCB;
 // void     UartSendTask(void *p_arg);
 
-// CPU_STK  UartRecTaskStk[UART_RECTASK_STK_SIZE];/*´®¿Ú½ÓÊÕ´¦ÀíÈÎÎñ¶ÑÕ»ºÍ¿ØÖÆ¿é*/
+// CPU_STK  UartRecTaskStk[UART_RECTASK_STK_SIZE];/*ä¸²å£æ¥æ”¶å¤„ç†ä»»åŠ¡å †æ ˆå’Œæ§åˆ¶å—*/
 // OS_TCB   UartRecTaskTCB;
 // void     UartRecTask(void *p_arg);
 
@@ -73,7 +73,7 @@ void  UartFifoInit(void)
 
 /*******************************************************************************
 * Function Name  : Uart1SendData.
-* Description    : ´®¿Ú1·¢ËÍ
+* Description    : ä¸²å£1å‘é€
 * Input          : None.
 * Output         : None.
 * Return         : None.
@@ -102,15 +102,15 @@ void  usart3send_flush(void)
 {
     if (ft_fifo_getlenth(&Usart3Fifo) > 0)
     {
-        // USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //¿ªÆôÖĞ¶Ï·¢ËÍ Ê¹ÄÜ
+        // USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //å¼€å¯ä¸­æ–­å‘é€ ä½¿èƒ½
         usart3_driver_send_enable();
-    } 
+    }
 }
 
 uint8_t usart3_get_fifo(uint8_t *pdata)
 {
     unsigned char   tempchar;
-    if (ft_fifo_getlenth(&Usart3Fifo) > 0) //»º³åÇøÓĞÊı¾İ
+    if (ft_fifo_getlenth(&Usart3Fifo) > 0) //ç¼“å†²åŒºæœ‰æ•°æ®
     {
         ft_fifo_get(&Usart3Fifo, &tempchar, 0, 1);
         *pdata = tempchar;
@@ -158,19 +158,19 @@ uint16_t  usart3_dma_get_fifo_data(uint8_t *pout, uint16_t  size)
         else
         {
             ft_fifo_get(Ptrfifo, (fifo_u8 *)pout, 0, size);
-       
+
             return size;
         }
-    } 
+    }
     return 0;
 }
-uint8_t   cmdbuf[48];
+uint8_t   cmdbuf[64];
 uint32_t  param = 0;
 uint8_t   usart3_recv_idle = 0;
-uint8_t  usart3_set_idle(void)
+uint8_t usart3_set_idle(void)
 {
     usart3_recv_idle = 1;
-		return  0;
+    return 0;
 }
 uint8_t  usart3_parse_cmd(void)
 {
@@ -179,7 +179,7 @@ uint8_t  usart3_parse_cmd(void)
     FT_FIFO *Ptrfifo = &Usart3RxFifo;
     iBuffLen = ft_fifo_getlenth(Ptrfifo);
     char *p1,*p2;
-    uint8_t  tmp_buf[100];
+    uint8_t  tmp_buf[50];
 //    uint16_t  val;
 
     if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
@@ -198,7 +198,8 @@ uint8_t  usart3_parse_cmd(void)
         p1 = strstr((const char *)cmdbuf, "set");
         if(p1)
         {
-            p2 =  strstr(p1+3, "f=");
+            p1=p1+3;
+            p2 =  strstr(p1, "f=");
             if(p2)
             {
                 if(isdigit_check(p2+2))
@@ -208,21 +209,38 @@ uint8_t  usart3_parse_cmd(void)
                     Usart3SendData((char *)tmp_buf, strlen((const char *)tmp_buf));
                 }
             }
-             p2 =  strstr((p1+3),"start");
+            p2 =  strstr((p1),"start");
             if(p2)
             {
                 extern void  adc_read_start(void);
                 adc_read_start();
                 //LOG_INFO("start=%d\n", get_global_tick());
             }
-            p2 =  strstr((p1+3),"read");
+            p2 =  strstr((p1),"read");
             if(p2)
             {
                 print_adc_data();
             }
-            // val = spi_adc_read();
-            // sprintf(tmp_buf, "%d,", val);
-            // Usart3SendData(tmp_buf, strlen(tmp_buf));
+            //add by bcg,2020-12-16 21:06:40 set sample period us
+            p2 =  strstr((p1),"period=");
+            if(p2)
+            {
+                p2=p2+strlen("period=");
+                if(isdigit_check(p2))
+                {
+                    run_status_g.min_period = atoi(p2);
+                }
+            }
+            //add by bcg,2020-12-16 21:07:09 set how long time run (us),default 100us
+            p2 =  strstr((p1),"long=");
+            if(p2)
+            {
+                p2=p2+strlen("long=");
+                if(isdigit_check(p2))
+                {
+                    run_status_g.time_sustain = atoi(p2);
+                }
+            }
         }
     }
     return 0;
@@ -232,7 +250,7 @@ uint8_t  usart3_parse_cmd(void)
 
 /*******************************************************************************
 * Function Name  : fputc.
-* Description    : ÖØ¶¨ÏòprintfµÄÊä³ö
+* Description    : é‡å®šå‘printfçš„è¾“å‡º
 * Input          : None.
 * Output         : None.
 * Return         : None.
@@ -256,7 +274,7 @@ int fputc(int ch, FILE *f)
 #if 0
 /*******************************************************************************
 * Function Name  : fgetc.
-* Description    : ÖØ¶¨ÏòscanfµÄÊä³ö Ã»ÓÃÍ¾
+* Description    : é‡å®šå‘scanfçš„è¾“å‡º æ²¡ç”¨é€”
 * Input          : None.
 * Output         : None.
 * Return         : None.

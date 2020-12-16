@@ -5,7 +5,11 @@
 #include "main.h"
 #include "tim9_driver.h"
 #include "usart_app.h"
-run_ctrl_struct     run_status_g = {0};
+run_ctrl_struct     run_status_g = {
+	.status_s = 0,
+	.min_period = 1,
+	.time_sustain = 1000,//us 
+};
 static uint32_t last_time_ticks = 0;
 static uint32_t all_time_ticks = 0;
 void   spi_adc_init(void)
@@ -62,7 +66,7 @@ void   get_adc_data(void)
 			adc_v_index = 0;
 			LOG_INFO("end=%d\n", get_global_tick());
 		}
-		
+
 	}
 }
 
@@ -77,7 +81,7 @@ void   get_adc_data_200khz(void)
 	{
 		// sdt_ch[2] = ',0'?
 		temp_tick = get_global_tick();
-		if(temp_tick - last_time_ticks >= 5)
+		if(temp_tick - last_time_ticks >= run_status_g.min_period)
 		{
 			last_time_ticks = temp_tick;
 			*((uint16_t *)sdt_ch) = spi_adc_read();
@@ -89,16 +93,17 @@ void   get_adc_data_200khz(void)
 			{
 				sample_nums_count = 0;
 				usart3send_flush();
-				//run_status_g.status_s = 0;
 			}
 		}
 
 
-		if(temp_tick - all_time_ticks >= 1000000)
+		if(temp_tick - all_time_ticks >= run_status_g.time_sustain)
 		{
 			run_status_g.status_s = 0;
+			sample_nums_count = 0;
+			usart3send_flush();
 		}
-		
+
 	}
 }
 void   print_adc_data(void)
@@ -127,7 +132,7 @@ uint16_t   get_adc_data_finish(void)
 	{
 		return 0;
 	}
-	
+
 }
 
 

@@ -72,11 +72,11 @@ int main(void)
        files before to branch to application main.
        To reconfigure the default setting of SystemInit() function,
        refer to system_stm32f4xx.c file */
-  uint32_t   tmp_count = 0;
+	uint32_t tmp_count = 0;
 	gpio_init();
 	usart3_init();
-  printf("version info = %d.%d.%d\n", VERSION_MAIN_NUM, VERSION_SUB1_NUM,VERSION_SUB2_NUM);
-  usart3send_flush();
+	printf("version info = %d.%d.%d\n", VERSION_MAIN_NUM, VERSION_SUB1_NUM, VERSION_SUB2_NUM);
+	usart3send_flush();
 	sADC_Init();
 	timer9_driver_init();
 	W5500_net_init();
@@ -92,21 +92,20 @@ int main(void)
 	led_off(LED_Y);
 	led_off(LED_O);
 	// adc_read_start();
-	spi_adc_read();//add by bcg,2020-12-05 11:14:05第一次读取0值去掉 
+	spi_adc_read();//add by bcg,2020-12-05 11:14:05第一次读取0值去掉
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
     tmp_count = get_global_tick();
 		// led_toggle(LED_Y);
 		// led_toggle(LED_O);
-    // tmp_count++;
 		// Delay(1);
-		//uart3_data_poll();
+
 		// spi_adc_read();
 		// adc_read_deal();
     // get_adc_data();
     get_adc_data_200khz();
-    
+
     if(tmp_count % (1000*1000) == 0)
     {
       led_toggle(LED_Y);
@@ -117,17 +116,6 @@ int main(void)
         // usart3send_flush();
     }
 
-
-    // if( i  == 0)
-		// {
-		// 	 i = 1;
-		//     sADC_CS_HIGH();
-		// }
-		// else
-		// {
-		// 	i  =0;
-		//    sADC_CS_LOW();
-		// }
 	}
 }
 
