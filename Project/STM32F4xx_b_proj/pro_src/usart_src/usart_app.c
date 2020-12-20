@@ -232,7 +232,7 @@ uint8_t  usart3_parse_cmd(void)
                     p2 = strstr((p1), "read");
                     if (p2)
                     {
-                        print_adc_data();
+                        print_run_param();
                     }
                     //add by bcg,2020-12-16 21:06:40 set sample period us
                     p2 = strstr((p1), "period=");
