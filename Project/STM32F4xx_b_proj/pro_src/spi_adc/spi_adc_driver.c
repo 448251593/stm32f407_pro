@@ -381,59 +381,55 @@ void sADC_LowLevel_DeInit(void)
   GPIO_Init(sADC_CS_GPIO_PORT, &GPIO_InitStructure);
 }
 
-#if 0
-#define sADC_GAIN1_PIN                        GPIO_Pin_4
-#define sADC_GAIN1_GPIO_PORT                  GPIOA
-#define sADC_GAIN1_GPIO_CLK                   RCC_AHB1Periph_GPIOA
+#if 1
+#define sADC_GAIN1_PIN                        GPIO_Pin_1
+#define sADC_GAIN1_GPIO_PORT                  GPIOB
+#define sADC_GAIN1_GPIO_CLK                   RCC_AHB1Periph_GPIOB
 
-#define sADC_GAIN2_PIN                        GPIO_Pin_5
-#define sADC_GAIN2_GPIO_PORT                  GPIOA
-#define sADC_GAIN2_GPIO_CLK                   RCC_AHB1Periph_GPIOA
+#define sADC_GAIN0_PIN                        GPIO_Pin_0
+#define sADC_GAIN0_GPIO_PORT                  GPIOB
+#define sADC_GAIN0_GPIO_CLK                   RCC_AHB1Periph_GPIOB
 
 
 void s_adc_gain_pin_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	/*!< Enable GPIO clocks */
-	//   RCC_AHB1PeriphClockCmd(sADC_GAIN_GPIO_CLK , ENABLE);
+	  RCC_AHB1PeriphClockCmd(sADC_GAIN1_GPIO_CLK| RCC_AHB1Periph_GPIOB, ENABLE);
 
 	/*!< Configure sADC Card CS pin in output pushpull mode ********************/
-	GPIO_InitStructure.GPIO_Pin = sADC_GAIN_PIN;
+	GPIO_InitStructure.GPIO_Pin = sADC_GAIN1_PIN|sADC_GAIN0_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(sADC_GAIN_GPIO_PORT, &GPIO_InitStructure);
+	GPIO_Init(sADC_GAIN1_GPIO_PORT, &GPIO_InitStructure);
 }
-typedef enum{
-	ADC_GAIN_1 = 0,
-	ADC_GAIN_2,
-	ADC_GAIN_3,
-	ADC_GAIN_4
-}ADC_GAIN_ENUM;
+
 void s_adc_gain_set(ADC_GAIN_ENUM id)
 {
 	switch (id)
-	{
-	case ADC_GAIN_1:
-		GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
-		GPIO_SetBits(sADC_GAIN2_GPIO_PORT, sADC_GAIN2_PIN);
+  {
+  case ADC_GAIN_0:
+    GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
+    break;
+  case ADC_GAIN_1:
+    GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_SetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
+    break;
+  case ADC_GAIN_2:
+    GPIO_SetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
+    break;
+  case ADC_GAIN_3:
+    GPIO_SetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_SetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
+    break;
+
+  default:
 		break;
-	case ADC_GAIN_2:
-		GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
-		GPIO_SetBits(sADC_GAIN2_GPIO_PORT, sADC_GAIN2_PIN);
-		break;
-	case ADC_GAIN_3:
-		GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
-		GPIO_SetBits(sADC_GAIN2_GPIO_PORT, sADC_GAIN2_PIN);
-		break;
-	case ADC_GAIN_4:
-		GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
-		GPIO_SetBits(sADC_GAIN2_GPIO_PORT, sADC_GAIN2_PIN);
-		break;
-	default:
-		break;
-	}
+  }
 }
 
 #endif

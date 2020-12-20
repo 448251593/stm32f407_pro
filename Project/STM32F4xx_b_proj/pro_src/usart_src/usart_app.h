@@ -15,7 +15,7 @@
 #define   REC_TIME_OUT        10//
 #define   UART_BUF_SIZE       100
 
-#define   UART1_BUF_SIZE      10240//
+#define   UART1_BUF_SIZE      1024*80//
 #define   USART1_REC_BUF_SIZE      128//
 
 #define   UART2_BUF_SIZE      500//
@@ -29,8 +29,8 @@
 extern FT_FIFO              Uart3RxFifo;
 extern unsigned char        Uart3RxBuf[UART3_RXBUF_SIZE];
 
-extern FT_FIFO              Uart4RxFifo;
-extern unsigned char        Uart4RxBuf[UART4_RXBUF_SIZE];
+// extern FT_FIFO              Uart4RxFifo;
+// extern unsigned char        Uart4RxBuf[UART4_RXBUF_SIZE];
 
 
 void   Uart_Config(void);
@@ -43,6 +43,6 @@ uint8_t usart_get_fifo(uint8_t *pdata);
 void Usart3SendData(char *p, uint16_t len);
 uint8_t usart3_put_fifo(uint8_t pdt);
 uint8_t usart3_parse_cmd(void);
-uint16_t  usart3_dma_get_fifo_data(uint8_t *pout, uint16_t  size);
+uint32_t  usart3_dma_get_fifo_data(uint8_t *pout, uint32_t  size);
 void  usart3send_flush(void);
 #endif

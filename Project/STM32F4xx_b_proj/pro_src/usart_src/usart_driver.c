@@ -103,7 +103,7 @@ int usart3_init(void)
 
   /* Enable the Tx buffer empty interrupt */
   USART_ITConfig(USARTx, USART_IT_RXNE, ENABLE);
-//   USART_ITConfig(USARTx, USART_IT_IDLE, ENABLE);
+  // USART_ITConfig(USARTx, USART_IT_IDLE, ENABLE);
 
 	return  0;
 }
@@ -162,11 +162,11 @@ static void USART_Config(void)
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */
-  USART_InitStructure.USART_BaudRate = 5250000;//921600;//115200;
+  USART_InitStructure.USART_BaudRate = 2000000;//5250000;//921600;//115200;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS;//USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
   USART_Init(USARTx, &USART_InitStructure);
 
@@ -286,11 +286,13 @@ void usart3_dma_start(void)
 	}
 }
 //add by bcg,2020-12-14 23:54:12 dma usart3 发送完成中断处理,如果没有新的数据就不用再发送
+uint16_t  dma_start_times = 0;
 void DMA1_Stream3_IRQHandler(void)
 {
 	if (DMA_GetITStatus(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3) == SET)
 	{
 		DMA_ClearITPendingBit(USARTx_TX_DMA_STREAM, DMA_IT_TCIF3);
+    dma_start_times++;
 		dma_complete_flag = 0;
 		/* Send Transaction data */
 		usart3_dma_start();

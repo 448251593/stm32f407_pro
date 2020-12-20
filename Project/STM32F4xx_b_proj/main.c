@@ -82,11 +82,12 @@ int main(void)
 	W5500_net_init();
 	/* SysTick end of count event each 10ms */
 	RCC_GetClocksFreq(&RCC_Clocks);
-	SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
+	// SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
+	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
 
 	/* Add your application code here */
 	/* Insert 50 ms delay */
-	Delay(5);
+	Delay(50);
 
 	/* Infinite loop */
 	led_off(LED_Y);
@@ -96,26 +97,25 @@ int main(void)
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
-    tmp_count = get_global_tick();
+		tmp_count = get_global_tick();
 		// led_toggle(LED_Y);
 		// led_toggle(LED_O);
 		// Delay(1);
 
 		// spi_adc_read();
 		// adc_read_deal();
-    // get_adc_data();
-    get_adc_data_200khz();
+		// get_adc_data();
+		get_adc_data_200khz();
 
-    if(tmp_count % (1000*1000) == 0)
-    {
-      led_toggle(LED_Y);
-      led_toggle(LED_O);
-        // tmp_count = get_global_tick();
-        // spi_adc_read();
-				// printf("tmp_count=%d",tmp_count);
-        // usart3send_flush();
-    }
-
+		if (tmp_count % (1000) == 0)
+		{
+			led_toggle(LED_Y);
+			led_toggle(LED_O);
+			// tmp_count = get_global_tick();
+			// spi_adc_read();
+			// printf("tmp_count=%d",tmp_count);
+			// usart3send_flush();
+		}
 	}
 }
 
@@ -139,15 +139,14 @@ void Delay(__IO uint32_t nTime)
   */
 void TimingDelay_Decrement(void)
 {
+	run_status_g.time_tick_ms++;
 	if (uwTimingDelay != 0x00)
 	{
 		uwTimingDelay--;
 	}
 
-  usart3_parse_cmd();
-
+	usart3_parse_cmd();
 }
-
 
 #ifdef USE_FULL_ASSERT
 

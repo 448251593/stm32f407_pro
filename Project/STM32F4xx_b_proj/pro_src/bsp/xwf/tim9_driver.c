@@ -134,7 +134,7 @@ int timer9_driver_init(void)
 
 	/* TIM IT enable */
 	// TIM_ITConfig(TIM9, TIM_IT_CC1 | TIM_IT_CC2, ENABLE);
-	TIM_ITConfig(TIM9, TIM_IT_CC1, ENABLE);
+	// TIM_ITConfig(TIM9, TIM_IT_CC1, ENABLE);
 
 	// while (1)
 	// {}
@@ -221,9 +221,11 @@ void TIM9_IRQHandler_s(void)
   }
 
 }
-uint32_t get_global_tick(void)
+inline uint32_t get_global_tick(void)
 {
-  return  timer_tick_ms_g;
+  // return  timer_tick_ms_g;
+  return  run_status_g.time_tick_ms;
+
 }
 #ifdef  USE_FULL_ASSERT
 

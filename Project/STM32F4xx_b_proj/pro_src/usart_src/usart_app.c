@@ -139,12 +139,12 @@ uint8_t  isdigit_check(char *str)
     }
     return 1;
 }
-uint16_t  usart3_dma_get_fifo_data(uint8_t *pout, uint16_t  size)
+uint32_t  usart3_dma_get_fifo_data(uint8_t *pout, uint32_t  size)
 {
-    uint16_t iBuffLen = 0;
+    uint32_t iBuffLen = 0;
     FT_FIFO *Ptrfifo = &Usart3Fifo;
     iBuffLen = ft_fifo_getlenth(Ptrfifo);
-    char *p1, *p2;
+    //char *p1, *p2;
 
     if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
     {
@@ -172,6 +172,8 @@ uint8_t usart3_set_idle(void)
     usart3_recv_idle = 1;
     return 0;
 }
+uint16_t   parse_timeout = 0;
+uint16_t  parse_last_len = 0;
 uint8_t  usart3_parse_cmd(void)
 {
 //    int iRet = 0;
@@ -182,63 +184,86 @@ uint8_t  usart3_parse_cmd(void)
     uint8_t  tmp_buf[50];
 //    uint16_t  val;
 
-    if (iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
+    if ( iBuffLen  > 0 ) //usart3_recv_idle = 1 &&
     {
-        usart3_recv_idle = 0;
-        memset(cmdbuf, 0, sizeof(cmdbuf));
-        if (iBuffLen <= sizeof(cmdbuf))
+        if (parse_last_len != iBuffLen)
         {
-            ft_fifo_get(Ptrfifo, (fifo_u8 *)cmdbuf, 0, iBuffLen);
+            parse_last_len = iBuffLen;
+            parse_timeout = 0;
         }
         else
         {
-            ft_fifo_get(Ptrfifo, (fifo_u8 *)cmdbuf, 0, sizeof(cmdbuf));
-        }
+            parse_timeout++;
+            if (parse_timeout > 200)
+            {
 
-        p1 = strstr((const char *)cmdbuf, "set");
-        if(p1)
-        {
-            p1=p1+3;
-            p2 =  strstr(p1, "f=");
-            if(p2)
-            {
-                if(isdigit_check(p2+2))
+                usart3_recv_idle = 0;
+                memset(cmdbuf, 0, sizeof(cmdbuf));
+                if (iBuffLen <= sizeof(cmdbuf))
                 {
-                    param = atoi(p2+2);
-                    sprintf(( char *)tmp_buf, "%d,", param);
-                    Usart3SendData((char *)tmp_buf, strlen((const char *)tmp_buf));
+                    ft_fifo_get(Ptrfifo, (fifo_u8 *)cmdbuf, 0, iBuffLen);
                 }
-            }
-            p2 =  strstr((p1),"start");
-            if(p2)
-            {
-                extern void  adc_read_start(void);
-                adc_read_start();
-                //LOG_INFO("start=%d\n", get_global_tick());
-            }
-            p2 =  strstr((p1),"read");
-            if(p2)
-            {
-                print_adc_data();
-            }
-            //add by bcg,2020-12-16 21:06:40 set sample period us
-            p2 =  strstr((p1),"period=");
-            if(p2)
-            {
-                p2=p2+strlen("period=");
-                if(isdigit_check(p2))
+                else
                 {
-                    run_status_g.min_period = atoi(p2);
+                    ft_fifo_get(Ptrfifo, (fifo_u8 *)cmdbuf, 0, sizeof(cmdbuf));
                 }
-            }
-            //add by bcg,2020-12-16 21:07:09 set how long time run (us),default 100us
-            p2 =  strstr((p1),"long=");
-            if(p2)
-            {
-                p2=p2+strlen("long=");
-                if(isdigit_check(p2))
+
+                p1 = strstr((const char *)cmdbuf, "set");
+                if (p1)
                 {
-                    run_status_g.time_sustain = atoi(p2);
+                    p1 = p1 + 3;
+                    p2 = strstr(p1, "f=");
+                    if (p2)
+                    {
+                        if (isdigit_check(p2 + 2))
+                        {
+                            param = atoi(p2 + 2);
+                            sprintf((char *)tmp_buf, "%d,", param);
+                            Usart3SendData((char *)tmp_buf, strlen((const char *)tmp_buf));
+                        }
+                    }
+                    p2 = strstr((p1), "start");
+                    if (p2)
+                    {
+                        extern void adc_read_start(void);
+                        adc_read_start();
+                        //LOG_INFO("start=%d\n", get_global_tick());
+                    }
+                    p2 = strstr((p1), "read");
+                    if (p2)
+                    {
+                        print_adc_data();
+                    }
+                    //add by bcg,2020-12-16 21:06:40 set sample period us
+                    p2 = strstr((p1), "period=");
+                    if (p2)
+                    {
+                        p2 = p2 + strlen("period=");
+                        if (isdigit_check(p2))
+                        {
+                            run_status_g.min_period = atoi(p2);
+                        }
+                    }
+                    //add by bcg,2020-12-16 21:07:09 set how long time run (us),default 100us
+                    p2 = strstr((p1), "long=");
+                    if (p2)
+                    {
+                        p2 = p2 + strlen("long=");
+                        if (isdigit_check(p2))
+                        {
+                            run_status_g.time_sustain = atoi(p2);
+                        }
+                    }
+                    p2 = strstr((p1), "gain=");
+                    if (p2)
+                    {
+                        p2 = p2 + strlen("gain=");
+                        if (isdigit_check(p2))
+                        {
+                            // run_status_g.time_sustain = atoi(p2);
+                            s_adc_gain_set(atoi(p2));
+                        }
+                    }
                 }
             }
         }

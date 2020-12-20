@@ -37,7 +37,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 
-
+typedef enum{
+	ADC_GAIN_0 = 0,
+	ADC_GAIN_1 ,
+	ADC_GAIN_2,
+	ADC_GAIN_3,
+}ADC_GAIN_ENUM;
 #define     SPI_ADC_DMA_ENABLE    0
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -124,6 +129,7 @@ uint16_t sADC_SendHalfWord(uint16_t HalfWord);
 void sADC_WriteEnable(void);
 void sADC_WaitForWriteEnd(void);
 void SPI_adc_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *pBuffer_rx, uint16_t NumByteToRx);
+void s_adc_gain_set(ADC_GAIN_ENUM id);
 #ifdef __cplusplus
 }
 #endif
