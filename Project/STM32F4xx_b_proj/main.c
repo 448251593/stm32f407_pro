@@ -54,7 +54,7 @@ static __IO uint32_t uwTimingDelay;
 RCC_ClocksTypeDef RCC_Clocks;
 
 /* Private function prototypes -----------------------------------------------*/
-static void Delay(__IO uint32_t nTime);
+
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -76,6 +76,8 @@ int main(void)
 	gpio_init();
 	usart3_init();
 	printf("version info = %d.%d.%d\n", VERSION_MAIN_NUM, VERSION_SUB1_NUM, VERSION_SUB2_NUM);
+	const char* time = __TIME__ " "__DATE__ ;
+	printf("build time = %s\n", time);
 	usart3send_flush();
 	sADC_Init();
 	timer9_driver_init();
@@ -106,16 +108,16 @@ int main(void)
 		// adc_read_deal();
 		// get_adc_data();
 		get_adc_data_200khz();
-
-		if (tmp_count % (1000) == 0)
-		{
-			led_toggle(LED_Y);
-			led_toggle(LED_O);
-			// tmp_count = get_global_tick();
-			// spi_adc_read();
-			// printf("tmp_count=%d",tmp_count);
-			// usart3send_flush();
-		}
+		NetLoop();
+		// if (tmp_count % (1000) == 0)
+		// {
+		// 	led_toggle(LED_Y);
+		// 	led_toggle(LED_O);
+		// 	// tmp_count = get_global_tick();
+		// 	// spi_adc_read();
+		// 	// printf("tmp_count=%d",tmp_count);
+		// 	// usart3send_flush();
+		// }
 	}
 }
 
@@ -124,7 +126,7 @@ int main(void)
   * @param  nTime: specifies the delay time length, in milliseconds.
   * @retval None
   */
-void Delay(__IO uint32_t nTime)
+void Delay( uint32_t nTime)
 {
 	uwTimingDelay = nTime;
 
@@ -146,6 +148,11 @@ void TimingDelay_Decrement(void)
 	}
 
 	usart3_parse_cmd();
+	if (run_status_g.time_tick_ms % (1000) == 0)
+	{
+		led_toggle(LED_Y);
+		led_toggle(LED_O);
+	}
 }
 
 #ifdef USE_FULL_ASSERT

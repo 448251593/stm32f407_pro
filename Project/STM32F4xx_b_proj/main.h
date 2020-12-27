@@ -44,11 +44,11 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 /* Exported macro ------------------------------------------------------------*/
 #define    VERSION_MAIN_NUM      1
 #define    VERSION_SUB1_NUM      0
-#define    VERSION_SUB2_NUM      1
-#define    LOG_INFO(  ... )    //do{printf(  __VA_ARGS__ );usart3send_flush();}while(0);
+#define    VERSION_SUB2_NUM      4
+#define    LOG_INFO(  ... )    printf(  __VA_ARGS__ )
 /* Exported functions ------------------------------------------------------- */
 void TimingDelay_Decrement(void);
-
+extern void Delay( uint32_t nTime);
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

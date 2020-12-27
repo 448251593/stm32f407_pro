@@ -16,6 +16,9 @@
 #include "protocol.h"
 
 
+
+
+extern void Delay( uint32_t nTime);
 unsigned short anyport=9013;
 
 #define ETH_RX_BUF_SIZE 2048 //以太网帧最大接收长度
@@ -155,7 +158,7 @@ uint8_t connect(SOCKET s, uint8_t * addr, unsigned short port)
 		ret=IINCHIP_READ(Sn_DPORT1(s));
         IINCHIP_WRITE( Sn_CR(s) ,Sn_CR_CONNECT);
 		ret=IINCHIP_READ(Sn_CR(s));
-       // Delay_ms(100);
+       Delay(100);
 		/* wait for completion */
 	   while ( IINCHIP_READ(Sn_CR(s) ) ){ };
 
@@ -543,13 +546,13 @@ void NetLoop(void)
 	//	debug("net",state);
 	switch (state) /*获取socket0的状态*/
 	{
-	case SOCK_INIT:																  /*socket初始化完成*/
-																				  // delay_ms(100);
-		connect(0, (uint8_t *)RJ45_config.server_ip, RJ45_config.server_port[0]); /*在TCP模式下向服务器发送连接请求*/
-																				  //LOG_INFO("SI\n");
-		break;
+   case SOCK_INIT: /*socket初始化完成*/
+      Delay(100);//Delay(50);
+      connect(0, (uint8_t *)RJ45_config.server_ip, RJ45_config.server_port[0]); /*在TCP模式下向服务器发送连接请求*/
+      printf("SI\n");
+      break;
 
-	case SOCK_ESTABLISHED: /*socket连接建立*/
+   case SOCK_ESTABLISHED: /*socket连接建立*/
 		if (getSn_IR(0) & Sn_IR_CON)
 		{
 			setSn_IR(0, Sn_IR_CON); /*Sn_IR的第0位置1而清0*/

@@ -40,10 +40,12 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+#if USART_DMA_TX_ENABEL
 uint8_t aTxBuffer[BUFFERSIZE] ;
 // __IO uint16_t aTxBuffer_datalen = 0x00;
 
 DMA_InitTypeDef  DMA_InitStructure;
+#endif
 // uint8_t aRxBuffer [BUFFERSIZE];
 // __IO uint8_t ubRxIndex = 0x00;
 // __IO uint8_t ubTxIndex = 0x00;
@@ -162,7 +164,7 @@ static void USART_Config(void)
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */
-  USART_InitStructure.USART_BaudRate = 2000000;//5250000;//921600;//115200;
+  USART_InitStructure.USART_BaudRate = 115200;//5250000;//921600;//115200;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;

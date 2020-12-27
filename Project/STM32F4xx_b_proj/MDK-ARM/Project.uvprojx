@@ -338,7 +338,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40_41xxx,USE_STM324xG_EVAL</Define>
               <Undefine></Undefine>
-              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src;..\pro_src\spi_flash;..\pro_src\spi_net;..\pro_src\spi_adc;..\pro_src\bsp\inc;..\pro_src\usart_src;..\pro_src\bsp\xwf</IncludePath>
+              <IncludePath>../;../../../Libraries/CMSIS/Device/ST/STM32F4xx/Include;../../../Libraries/STM32F4xx_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3240_41_G_EVAL;..\pro_src;..\pro_src\spi_flash;..\pro_src\spi_net;..\pro_src\spi_adc;..\pro_src\bsp\inc;..\pro_src\usart_src;..\pro_src\bsp\xwf;..\pro_src\spi_net_w5500_offical</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -700,11 +700,113 @@
               <FileName>socket.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_net\socket.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
               <FileName>w5500.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_net\w5500.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
               <FileName>spi_net_driver.c</FileName>
@@ -1597,6 +1699,31 @@
                   </Aads>
                 </FileArmAds>
               </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>w5500_offical_code</GroupName>
+          <Files>
+            <File>
+              <FileName>loopback.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\loopback.c</FilePath>
+            </File>
+            <File>
+              <FileName>socket.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\socket.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\w5500.c</FilePath>
+            </File>
+            <File>
+              <FileName>wizchip_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3042,6 +3169,31 @@
                   </Aads>
                 </FileArmAds>
               </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>w5500_offical_code</GroupName>
+          <Files>
+            <File>
+              <FileName>loopback.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\loopback.c</FilePath>
+            </File>
+            <File>
+              <FileName>socket.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\socket.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\w5500.c</FilePath>
+            </File>
+            <File>
+              <FileName>wizchip_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -38,7 +38,9 @@ void  adc_read_start(void)
 	run_status_g.status_s = 1;
 	all_time_ticks = get_global_tick();
 	sample_nums_count_all = 0;
+#if USART_DMA_TX_ENABEL
 	dma_start_times = 0;
+#endif
 }
 void  adc_read_deal(void)
 {

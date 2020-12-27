@@ -15,7 +15,7 @@
 #define   REC_TIME_OUT        10//
 #define   UART_BUF_SIZE       100
 
-#define   UART1_BUF_SIZE      1024*80//
+#define   UART1_BUF_SIZE      128*1//
 #define   USART1_REC_BUF_SIZE      128//
 
 #define   UART2_BUF_SIZE      500//

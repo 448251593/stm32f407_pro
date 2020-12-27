@@ -33,6 +33,10 @@ enum socket_connect_flag
   Connect,
   Connect_none,
  };	 
-
+extern uint16_t   socket_state;
+extern uint16_t   heart_beat_time;
+extern uint16_t   protocal_overtime;
+extern uint16_t   rx_tail;
+void NetLoop(void);
 #endif
 /* _SOCKET_H_ */

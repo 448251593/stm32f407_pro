@@ -112,6 +112,8 @@ uint16_t sNET_SendHalfWord(uint16_t HalfWord);
 void sNET_WriteEnable(void);
 void sNET_WaitForWriteEnd(void);
 void SPI_net_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *pBuffer_rx, uint16_t NumByteToRx);
+void SPI_set_slave_select(void);
+void SPI_clear_slave_select(void);
 #ifdef __cplusplus
 }
 #endif

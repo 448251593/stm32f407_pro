@@ -87,6 +87,7 @@ void   Usart3SendData(char *p, uint16_t len)
     unsigned  int  templen;
     // CPU_SR_ALLOC();
     // CPU_CRITICAL_ENTER();
+    __disable_irq() ; //关闭总中断
 
 
     templen = ft_fifo_getlenth(&Usart3Fifo);
@@ -96,10 +97,16 @@ void   Usart3SendData(char *p, uint16_t len)
         ft_fifo_put(&Usart3Fifo,(unsigned char *) p, len);
     }
     // CPU_CRITICAL_EXIT();
+    __enable_irq() ; //打开总中断
+      #if  USART_DMA_TX_ENABEL
+      #else
+      usart3send_flush();
+      #endif
 }
 
 void  usart3send_flush(void)
 {
+ 
     if (ft_fifo_getlenth(&Usart3Fifo) > 0)
     {
         // USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //开启中断发送 使能

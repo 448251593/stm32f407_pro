@@ -20,6 +20,8 @@
 #include "w5500.h"
 #include "protocol.h"
 #include "main.h"
+#include "socket.h"
+
 
 RJ45_config_struct  RJ45_config = {0};
 // #include "app/uart/debug_def.h"
@@ -55,9 +57,9 @@ void W5500_net_init(void)
 	sNET_Init();
 #endif
 
-	// socket_state = Disconnect;
-	// RJ45_config.enable = 0;
-	// heart_beat_time = 0x00;
+	socket_state = Disconnect;
+	RJ45_config.enable = 0;
+	heart_beat_time = 0x00;
 	NetInit();
 }
 
@@ -222,7 +224,7 @@ void set_rj45_config(uint8_t *config)
 void NetInit(void)
 {
 	uint8_t tmp_data[6], i;
-	//	set_netpara_default();
+		set_netpara_default();
 	i = getVersion();
 	//	debug("netVer",i);
 
@@ -244,9 +246,13 @@ void NetInit(void)
 	setGAR(tmp_data); /*����Ĭ������*/
 
 	getSHAR(tmp_data);
+	LOG_INFO("getshar=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
 	getSIPR(tmp_data);
+	LOG_INFO("getSIPR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
 	getSUBR(tmp_data);
+	LOG_INFO("getSUBR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
 	getGAR(tmp_data);
+	LOG_INFO("getGAR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
 
 	sysinit(txsize, rxsize); /*��ʼ��8��socket*/
 
@@ -272,15 +278,7 @@ uint16_t getIINCHIP_TxMAX(uint8_t s)
 	return SSIZE[s];
 }
 
-//add by bcg,2020-09-02 14:13:54---
-void SPI_set_slave_select(void)
-{
-	sNET_CS_LOW();
-}
-void SPI_clear_slave_select(void)
-{
-	sNET_CS_HIGH();
-}
+
 
 void IINCHIP_WRITE(uint32_t addrbsb, uint8_t data)
 {
@@ -302,7 +300,7 @@ void IINCHIP_WRITE(uint32_t addrbsb, uint8_t data)
 	//   W5500_CS_HIGH;                               // CS=1,  SPI end
 	//  IINCHIP_ISR_ENABLE();                         // Interrupt Service Routine Enable
 }
-
+uint8_t chip_read_v = 0;
 uint8_t IINCHIP_READ(uint32_t addrbsb)
 {
 	uint8_t data[1];
@@ -320,7 +318,8 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	//  wait_ready();
 	SPI_clear_slave_select();
 	// if(addrbsb==Sn_CR(0))return 0;  //debug
-	LOG_INFO("chip read=0x%02x\n", data[0]);
+	chip_read_v = data[0];
+
 	return data[0];
 }
 
@@ -611,7 +610,10 @@ uint8_t getPHYCFGR(void)
 
 uint8_t getVersion(void)
 {
-	return IINCHIP_READ(VERSIONR);
+	uint8_t  tt;
+	tt = IINCHIP_READ(VERSIONR);
+		LOG_INFO("chip read=0x%02x\n", tt);
+	return tt;
 }
 ///**
 //@brief  get socket TX free buf size

@@ -262,6 +262,15 @@ void sNET_LowLevel_DeInit(void)
   GPIO_InitStructure.GPIO_Pin = sNET_CS_PIN;
   GPIO_Init(sNET_CS_GPIO_PORT, &GPIO_InitStructure);
 }
+//add by bcg,2020-09-02 14:13:54---
+void SPI_set_slave_select(void)
+{
+	sNET_CS_LOW();
+}
+void SPI_clear_slave_select(void)
+{
+	sNET_CS_HIGH();
+}
 #if 0
 /**
   * @brief  Erases the specified NET sector.
