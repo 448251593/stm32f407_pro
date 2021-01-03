@@ -9,10 +9,10 @@
 wiz_NetInfo gWIZNETINFO=
 {
    .mac={12,33,44,55,66,77},
-   .ip={192,168,2,100},
+   .ip={192,168,0,100},
    .sn={255,255,255,0},
-   .gw={192,168,2,1},
-   .dns={192,168,2,1},
+   .gw={192,168,0,1},
+   .dns={192,168,0,1},
    .dhcp=1,
 };
 #define   NET_SEND_BUF_SIZE      1024*80//
@@ -32,14 +32,16 @@ void    W5500_net_init(void)
    reg_wizchip_spi_cbfunc(sNET_ReadByte, sNET_SendByte); 
 
    ctlnetwork(CN_SET_NETINFO, &gWIZNETINFO);
+   memset(&gWIZNETINFO, 0, sizeof(gWIZNETINFO));
+   gWIZNETINFO.dhcp = 1;
    ctlnetwork(CN_GET_NETINFO, &gWIZNETINFO);
-   printf("mac=%d,%d,%d,%d,%d,%d\n", gWIZNETINFO.mac[0],gWIZNETINFO.mac[1],gWIZNETINFO.mac[2],
+   printf("mac=%d:%d:%d:%d:%d:%d\n", gWIZNETINFO.mac[0],gWIZNETINFO.mac[1],gWIZNETINFO.mac[2],
    gWIZNETINFO.mac[3],gWIZNETINFO.mac[4],gWIZNETINFO.mac[5]);
-   printf("ip=%d,%d,%d,%d\n", gWIZNETINFO.ip[0],gWIZNETINFO.ip[1],gWIZNETINFO.ip[2],
+   printf("ip=%d.%d.%d.%d\n", gWIZNETINFO.ip[0],gWIZNETINFO.ip[1],gWIZNETINFO.ip[2],
    gWIZNETINFO.ip[3]);
-   printf("sn=%d,%d,%d,%d\n", gWIZNETINFO.sn[0],gWIZNETINFO.sn[1],gWIZNETINFO.sn[2],
+   printf("sn=%d.%d.%d.%d\n", gWIZNETINFO.sn[0],gWIZNETINFO.sn[1],gWIZNETINFO.sn[2],
    gWIZNETINFO.sn[3]);
-   printf("gw=%d,%d,%d,%d\n", gWIZNETINFO.gw[0],gWIZNETINFO.gw[1],gWIZNETINFO.gw[2],
+   printf("gw=%d.%d.%d.%d\n", gWIZNETINFO.gw[0],gWIZNETINFO.gw[1],gWIZNETINFO.gw[2],
    gWIZNETINFO.gw[3]);
 
    printf("w5500---version=%d\n",getVERSIONR());
@@ -48,8 +50,8 @@ void    W5500_net_init(void)
 uint8_t rx_buf[DATA_BUF_SIZE];
 void   NetLoop(void)
 {
-   const uint8_t destip[4] = {192, 168, 2, 214};
-   const uint16_t destport = 5000;
+   const uint8_t destip[4] = {192, 168, 0, 112};
+   const uint16_t destport = 6800;
    loopback_tcpc(0, rx_buf, (uint8_t*)destip, destport);
 
 }
@@ -68,6 +70,26 @@ uint16_t  w5500_send( void)
          ft_fifo_setoffset(&spi_net_send_Fifo, ret);
       }
    }
+}
+
+void   w5500_send_put(char *p, uint32_t len)
+{
+
+    unsigned  int  templen;
+    // CPU_SR_ALLOC();
+    // CPU_CRITICAL_ENTER();
+    __disable_irq() ; //关闭总中断
+
+
+    templen = ft_fifo_getlenth(&spi_net_send_Fifo);
+
+    if (len + templen <= NET_SEND_BUF_SIZE - 1)
+    {
+        ft_fifo_put(&spi_net_send_Fifo,(unsigned char *) p, len);
+    }
+    // CPU_CRITICAL_EXIT();
+    __enable_irq() ; //打开总中断
+
 }
 
 int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport)
@@ -123,6 +145,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
                }
                sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
             }
+               w5500_send_put("helloworld",  10);
          }
          w5500_send();
        //////////////////////////////////////////////////////////////////////////////////////////////

@@ -26,5 +26,5 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 
 /* UDP Loopback test example */
 int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port);
-
+void   w5500_send_put(char *p, uint32_t len);
 #endif

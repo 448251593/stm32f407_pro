@@ -14,6 +14,7 @@
 
 #include "socket.h"
 #include "protocol.h"
+#include "fifobuffer.h"
 
 
 
@@ -528,26 +529,119 @@ uint8_t SendSocketData(SOCKET s, uint8_t * buf, uint16_t len)
 	return 0;
 }
 
+FT_FIFO              spi_net_send_Fifo;
+unsigned char        spi_net_send_Buf[NET_SEND_BUF_SIZE];
+uint8_t     w5500_send_flush_flag = 0;
+
+uint8_t rx_buf[DATA_BUF_SIZE];
+void      w5500_fifo_init(void)
+{
+      ft_fifo_init(&spi_net_send_Fifo, spi_net_send_Buf, NET_SEND_BUF_SIZE);
+}
+void     w5500_send_flush(void)
+{
+   w5500_send_flush_flag = 1;
+   printf("start net_send=%d\n", get_global_tick());
+   return;
+}
+uint16_t  w5500_send( void)
+{
+   unsigned int len_t;
+   unsigned int ret;
+   if (w5500_send_flush_flag == 0)
+   {
+      return 0;
+   }
+   len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
+   if (len_t > 0)
+   {
+      if (len_t >= DATA_BUF_SIZE)
+      {
+         len_t = DATA_BUF_SIZE;
+      }
+      #if 0
+      ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
+      ret = SendSocketData(0, rx_buf , len_t);
+      // SendSocketData(0, message, sizeof(message)); //向Server发送数据;
+      if (ret == 0)
+      {
+         ft_fifo_setoffset(&spi_net_send_Fifo, len_t);
+         w5500_send_flush_flag = 0;
+      }
+      #else
+      ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
+      ret = send(0, rx_buf, len_t);
+      if (ret > 0)
+      {
+         ft_fifo_setoffset(&spi_net_send_Fifo, ret);
+         // w5500_send_flush_flag = 0;
+      }
+      else if (ret < 0)
+      {
+         close(0);
+         socket_state = Disconnect;
+      }
+#endif
+   }
+   else
+   {
+      w5500_send_flush_flag = 0;
+       printf("net send end=%d\n", get_global_tick());
+   }
+}
+
+void   w5500_send_put(char *p, uint32_t len)
+{
+
+    unsigned  int  templen;
+    // CPU_SR_ALLOC();
+    // CPU_CRITICAL_ENTER();
+    __disable_irq() ; //关闭总中断
+
+
+    templen = ft_fifo_getlenth(&spi_net_send_Fifo);
+
+    if (len + templen <= NET_SEND_BUF_SIZE - 1)
+    {
+        ft_fifo_put(&spi_net_send_Fifo,(unsigned char *) p, len);
+    }
+    // CPU_CRITICAL_EXIT();
+    __enable_irq() ; //打开总中断
+
+}
+uint32_t  state_update_count= 0 ;
 void NetLoop(void)
 {
 	unsigned char state, phy_cfgr;
 	unsigned short erx_len; //,etx_len;
 	//unsigned char i,j=0,num=0;
 	uint8_t message[] = "Hello World";
-	phy_cfgr = getPHYCFGR();
-	if (!(phy_cfgr & 0x1))
-	{
-		disconnect(0);
-		socket_state = Connect_none;
-		return;
-	}
+	// phy_cfgr = getPHYCFGR();
+	// if (!(phy_cfgr & 0x1))
+	// {
+	// 	disconnect(0);
+	// 	socket_state = Connect_none;
+	// 	return;
+	// }
 
-	state = getSn_SR(0);
+   if(state_update_count++ > 10000)
+   {
+      state = getSn_SR(0);
+      state_update_count = 0;
+   }
+   else
+   {
+      if(socket_state == Connect)
+      {
+         w5500_send();
+         // return;
+      }
+   }
 	//	debug("net",state);
 	switch (state) /*获取socket0的状态*/
 	{
    case SOCK_INIT: /*socket初始化完成*/
-      Delay(100);//Delay(50);
+      Delay(50);//Delay(50);
       connect(0, (uint8_t *)RJ45_config.server_ip, RJ45_config.server_port[0]); /*在TCP模式下向服务器发送连接请求*/
       printf("SI\n");
       break;
@@ -565,20 +659,20 @@ void NetLoop(void)
 			break;
 
 		case Connect:
-			erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
-			if (erx_len > 0)
-			{
-				recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
-				rx_tail = rx_tail + erx_len;
-				protocal_overtime = 0;
-				recv_buf[rx_tail++] = 0x00;
-				RJ45_config.enable = 1;
-			}
-			if (heart_beat_time >= HEART_BEAT_CNT_MAX)
-			{
-				SendSocketData(0, message, sizeof(message)); //向Server发送数据
-			}
-
+			// erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
+			// if (erx_len > 0)
+			// {
+			// 	recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
+			// 	rx_tail = rx_tail + erx_len;
+			// 	protocal_overtime = 0;
+			// 	recv_buf[rx_tail++] = 0x00;
+			// 	RJ45_config.enable = 1;
+			// }
+			// if (heart_beat_time >= HEART_BEAT_CNT_MAX)
+			// {
+			// 	SendSocketData(0, message, sizeof(message)); //向Server发送数据
+			// }
+         w5500_send();
 			break;
 		default:
 			break;

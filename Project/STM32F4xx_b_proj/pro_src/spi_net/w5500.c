@@ -28,19 +28,19 @@ RJ45_config_struct  RJ45_config = {0};
 
 //spi_instance_t _net_core_spi;
 
-unsigned char const default_server_ip[] = {192, 168, 2, 112};
-unsigned char const default_client_ip[] = {192, 168, 2, 100};
+unsigned char const default_server_ip[] = {192, 168, 0, 112};
+unsigned char const default_client_ip[] = {192, 168, 0, 100};
 unsigned short const default_server_port[] = {6800};
 unsigned char const default_mask[] = {255, 255, 255, 0};
-unsigned char const default_gateway[4] = {192, 168, 2, 254};
+unsigned char const default_gateway[4] = {192, 168, 0, 254};
 unsigned char const default_mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
 static uint8_t I_STATUS[8];
 static uint16_t SSIZE[8]; /**< Max Tx buffer size by each channel */
 static uint16_t RSIZE[8]; /**< Max Rx buffer size by each channel */
 
-uint8_t txsize[8] = {4, 2, 2, 2, 2, 1, 1, 2};
-uint8_t rxsize[8] = {4, 2, 2, 2, 2, 1, 1, 2};
+uint8_t txsize[8] = {8, 2, 2, 2, 2, 0, 0, 0};
+uint8_t rxsize[8] = {8, 2, 2, 2, 2, 0, 0, 0};
 
 void W5500_net_init(void)
 {
@@ -57,10 +57,12 @@ void W5500_net_init(void)
 	sNET_Init();
 #endif
 
+	w5500_fifo_init();
 	socket_state = Disconnect;
 	RJ45_config.enable = 0;
 	heart_beat_time = 0x00;
 	NetInit();
+
 }
 
 void set_netpara_default()
@@ -246,13 +248,14 @@ void NetInit(void)
 	setGAR(tmp_data); /*����Ĭ������*/
 
 	getSHAR(tmp_data);
-	LOG_INFO("getshar=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
+	LOG_INFO("get mac=%x:%x:%x:%x:%x:%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
 	getSIPR(tmp_data);
-	LOG_INFO("getSIPR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
+	LOG_INFO("gelocal_ip=%d.%d.%d.%d\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3]);
 	getSUBR(tmp_data);
-	LOG_INFO("getSUBR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
+	LOG_INFO("getmask=%d.%d.%d.%d\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3]);
 	getGAR(tmp_data);
-	LOG_INFO("getGAR=%x,%x,%x,%x,%x,%x\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3], tmp_data[4], tmp_data[5]);
+	LOG_INFO("getgateway=%d.%d.%d.%d\n", tmp_data[0], tmp_data[1], tmp_data[2], tmp_data[3]);
+	LOG_INFO("port=%d\n", default_server_port[0]);
 
 	sysinit(txsize, rxsize); /*��ʼ��8��socket*/
 
@@ -326,9 +329,10 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 {
 	uint16_t idx = 0;
-	unsigned char cmd_buffer[2048];
+	unsigned char cmd_buffer[10], *p_buffer;
 	// CS=0, SPI start
 	SPI_set_slave_select();
+	#if 0
 	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
 	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
 	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
@@ -339,6 +343,28 @@ uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 	}
 	//    SPI_transfer_block(net_core_spi, cmd_buffer, (idx+3), 0, 0);
 	   SPI_net_transfer_block( cmd_buffer, (idx+3), 0, 0);
+
+#else
+	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
+	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
+	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
+	//
+	idx = 3;
+	p_buffer = cmd_buffer;
+	while (idx--)
+	{
+		sNET_SendByte(*p_buffer++);
+	}
+	//---------------
+	idx = len;
+	p_buffer = buf;
+	while (idx--)
+	{
+		sNET_SendByte(*p_buffer++);
+	}
+
+#endif
+
 	//  wait_ready();
 	SPI_clear_slave_select();
 

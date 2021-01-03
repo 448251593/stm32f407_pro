@@ -33,10 +33,16 @@ enum socket_connect_flag
   Connect,
   Connect_none,
  };	 
+ #ifndef DATA_BUF_SIZE
+	#define DATA_BUF_SIZE			(1024*7)
+#endif
+#define   NET_SEND_BUF_SIZE      1024*110//
 extern uint16_t   socket_state;
 extern uint16_t   heart_beat_time;
 extern uint16_t   protocal_overtime;
 extern uint16_t   rx_tail;
 void NetLoop(void);
+void   w5500_send_put(char *p, uint32_t len);
+void      w5500_fifo_init(void);
 #endif
 /* _SOCKET_H_ */

@@ -234,7 +234,7 @@ uint8_t  usart3_parse_cmd(void)
                     {
                         extern void adc_read_start(void);
                         adc_read_start();
-                        //LOG_INFO("start=%d\n", get_global_tick());
+                        LOG_INFO("start=%d\n", get_global_tick());
                     }
                     p2 = strstr((p1), "read");
                     if (p2)
@@ -249,6 +249,7 @@ uint8_t  usart3_parse_cmd(void)
                         if (isdigit_check(p2))
                         {
                             run_status_g.min_period = atoi(p2);
+                            LOG_INFO("period=%d\n", run_status_g.min_period);
                         }
                     }
                     //add by bcg,2020-12-16 21:07:09 set how long time run (us),default 100us
@@ -259,6 +260,7 @@ uint8_t  usart3_parse_cmd(void)
                         if (isdigit_check(p2))
                         {
                             run_status_g.time_sustain = atoi(p2);
+                            LOG_INFO("long=%d\n", run_status_g.time_sustain);
                         }
                     }
                     p2 = strstr((p1), "gain=");
@@ -269,6 +271,7 @@ uint8_t  usart3_parse_cmd(void)
                         {
                             // run_status_g.time_sustain = atoi(p2);
                             s_adc_gain_set(atoi(p2));
+                            LOG_INFO("gain=%d\n", atoi(p2));
                         }
                     }
                 }

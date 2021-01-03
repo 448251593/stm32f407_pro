@@ -5,6 +5,7 @@
 #include "main.h"
 #include "tim9_driver.h"
 #include "usart_app.h"
+#include "socket.h"
 run_ctrl_struct     run_status_g = {
 	.status_s = 0,
 	.min_period = 1,
@@ -29,7 +30,7 @@ uint16_t spi_adc_read(void)
 	addata1 = sADC_ReadByte();
 	ittt = addata1 << 2;
 	ittt = ittt >> 4;
-	ittt = (ittt * 3300 / 4096);
+	// ittt = (ittt * 3300 / 4096);
 
 	return (uint16_t)ittt;
 }
@@ -60,7 +61,7 @@ uint32_t  sample_interval_count = 0;
 uint8_t  get_adc_interval_check(void)
 {
 	sample_interval_count++;
-	if(sample_interval_count > 5)
+	if(sample_interval_count > 1)
 	{
 		sample_interval_count = 0;
 		
@@ -71,7 +72,7 @@ uint8_t  get_adc_interval_check(void)
 }
 void   get_adc_data_200khz(void)
 {
-
+#if 0
 	//uint16_t   adc_t = 0;
 	uint8_t   sdt_ch[3] = {0};
 	if (run_status_g.status_s == 1)
@@ -109,6 +110,46 @@ void   get_adc_data_200khz(void)
 		}
 
 	}
+	#else
+	//uint16_t   adc_t = 0;
+	uint8_t   sdt_ch[3] = {0};
+	if (run_status_g.status_s == 1)
+	{
+		if (get_adc_interval_check() == 0)
+		{
+			return;
+		}
+		// sdt_ch[2] = ',0'?
+		temp_tick = get_global_tick();
+
+		*((uint16_t *)sdt_ch) = spi_adc_read();
+		sdt_ch[2] = sdt_ch[0];//add by bcg,2020-12-20 11:09:38 把高位调换到低位,改为大端发送
+		w5500_send_put((char*)&sdt_ch[1], 2);
+
+		sample_nums_count++;
+		sample_nums_count_all++;
+		if(sample_nums_count >= NET_SEND_BUF_SIZE / 2)
+		{
+			sample_nums_count = 0;
+			w5500_send_flush();
+
+			run_status_g.status_s = 0;
+			sample_nums_count = 0;
+			LOG_INFO("sample_nums_count_all1=%d\n",sample_nums_count_all);
+			LOG_INFO ("end1=%d\n",temp_tick);
+		}
+
+		if(temp_tick - all_time_ticks >= run_status_g.time_sustain)
+		{
+			run_status_g.status_s = 0;
+			sample_nums_count = 0;
+			w5500_send_flush();
+			LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
+			LOG_INFO ("end=%d\n",temp_tick);
+		}
+
+	}
+	#endif
 }
 void   print_run_param(void)
 {
