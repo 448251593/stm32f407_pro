@@ -128,16 +128,22 @@ void   get_adc_data_200khz(void)
 
 		sample_nums_count++;
 		sample_nums_count_all++;
-		if(sample_nums_count >= NET_SEND_BUF_SIZE / 2)
+		
+		if(sample_nums_count >= DATA_BUF_SIZE / 2)
 		{
 			sample_nums_count = 0;
 			w5500_send_flush();
-
-			run_status_g.status_s = 0;
-			sample_nums_count = 0;
-			LOG_INFO("sample_nums_count_all1=%d\n",sample_nums_count_all);
-			LOG_INFO ("end1=%d\n",temp_tick);
 		}
+
+
+		// if (sample_nums_count >= NET_SEND_BUF_SIZE / 2)
+		// {
+
+		// 	run_status_g.status_s = 0;
+		// 	sample_nums_count = 0;
+		// 	LOG_INFO("sample_nums_count_all1=%d\n", sample_nums_count_all);
+		// 	LOG_INFO("end1=%d\n", temp_tick);
+		// }
 
 		if(temp_tick - all_time_ticks >= run_status_g.time_sustain)
 		{

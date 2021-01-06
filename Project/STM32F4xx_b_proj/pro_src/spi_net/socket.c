@@ -541,7 +541,7 @@ void      w5500_fifo_init(void)
 void     w5500_send_flush(void)
 {
    w5500_send_flush_flag = 1;
-   printf("start net_send=%d\n", get_global_tick());
+   // printf("start net_send=%d\n", get_global_tick());
    return;
 }
 uint16_t  w5500_send( void)
@@ -559,7 +559,7 @@ uint16_t  w5500_send( void)
       {
          len_t = DATA_BUF_SIZE;
       }
-      #if 0
+#if 0
       ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
       ret = SendSocketData(0, rx_buf , len_t);
       // SendSocketData(0, message, sizeof(message)); //向Server发送数据;
@@ -568,7 +568,7 @@ uint16_t  w5500_send( void)
          ft_fifo_setoffset(&spi_net_send_Fifo, len_t);
          w5500_send_flush_flag = 0;
       }
-      #else
+#else
       ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
       ret = send(0, rx_buf, len_t);
       if (ret > 0)

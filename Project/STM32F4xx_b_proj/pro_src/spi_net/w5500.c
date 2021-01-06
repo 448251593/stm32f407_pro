@@ -92,7 +92,7 @@ uint8_t  ascii_2_uint(uint8_t *pd,uint8_t n)
 void get_int_from_string(uint8_t *uint, uint8_t *config, uint8_t num)
 {
 	uint8_t i, j, cdata[5];
-	uint32_t data = 0;
+//	uint32_t data = 0;
 	for (i = 0; i < num; i++)
 	{
 		for (j = 0; j < 5; j++)
@@ -111,7 +111,7 @@ void get_int_from_string(uint8_t *uint, uint8_t *config, uint8_t num)
 void get_int_from_string2(uint16_t *uint, uint8_t *config, uint8_t num)
 {
 	uint8_t i, j, cdata[5];
-	uint32_t data = 0;
+//	uint32_t data = 0;
 	for (i = 0; i < num; i++)
 	{
 		for (j = 0; j < 5; j++)
@@ -173,7 +173,7 @@ typedef enum
 	mac_addr,
 	gate_way,
 	sub_ETH_end,
-};
+}w5500_custom_type;
 void set_rj45_config(uint8_t *config)
 {
 	#if 0
@@ -303,7 +303,7 @@ void IINCHIP_WRITE(uint32_t addrbsb, uint8_t data)
 	//   W5500_CS_HIGH;                               // CS=1,  SPI end
 	//  IINCHIP_ISR_ENABLE();                         // Interrupt Service Routine Enable
 }
-uint8_t chip_read_v = 0;
+// uint8_t chip_read_v = 0;
 uint8_t IINCHIP_READ(uint32_t addrbsb)
 {
 	uint8_t data[1];
@@ -317,22 +317,30 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	//  wait_ready();
 
 	//    SPI_transfer_block(net_core_spi, cmd_buffer, 3, data, 1);
+#if SPI_NET_DMA_ENABEL
+	// spi_dma_data_buf_clear();
+	// spi_dma_put_data_buf(cmd_buffer, 3);
+	// spi_dma_read(data, 1);
 	SPI_net_transfer_block( cmd_buffer, 3, data, 1);
+#else
+	SPI_net_transfer_block( cmd_buffer, 3, data, 1);
+
+#endif
 	//  wait_ready();
 	SPI_clear_slave_select();
 	// if(addrbsb==Sn_CR(0))return 0;  //debug
-	chip_read_v = data[0];
+	// chip_read_v = data[0];
 
 	return data[0];
 }
 
 uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 {
-	uint16_t idx = 0;
-	unsigned char cmd_buffer[10], *p_buffer;
+
+	unsigned char cmd_buffer[10];
 	// CS=0, SPI start
 	SPI_set_slave_select();
-	#if 0
+#if 0
 	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
 	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
 	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
@@ -345,6 +353,18 @@ uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 	   SPI_net_transfer_block( cmd_buffer, (idx+3), 0, 0);
 
 #else
+
+#if SPI_NET_DMA_ENABEL
+	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
+	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
+	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
+	spi_dma_data_buf_clear();
+	spi_dma_put_data_buf(cmd_buffer, 3);
+	spi_dma_put_data_buf(buf, len);
+	spi_dma_write();
+#else
+	uint16_t idx = 0;
+	unsigned char  *p_buffer;
 	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
 	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
 	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
@@ -362,6 +382,9 @@ uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 	{
 		sNET_SendByte(*p_buffer++);
 	}
+#endif
+
+
 
 #endif
 

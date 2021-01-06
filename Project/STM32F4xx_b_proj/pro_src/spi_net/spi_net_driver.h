@@ -85,13 +85,23 @@
 #define sNET_CS_GPIO_PORT                  GPIOI
 #define sNET_CS_GPIO_CLK                   RCC_AHB1Periph_GPIOI
 
-
+#define sNET_DMA                            DMA1
+#define sNET_DMA_CLK                        RCC_AHB1Periph_DMA1
+#define sNET_TX_DMA_CHANNEL                 DMA_Channel_0
+#define sNET_TX_DMA_STREAM                  DMA1_Stream4
+#define sNET_TX_DMA_FLAG_TCIF               DMA_FLAG_TCIF4
+#define sNET_RX_DMA_CHANNEL                 DMA_Channel_0
+#define sNET_RX_DMA_STREAM                  DMA1_Stream3
+#define sNET_RX_DMA_FLAG_TCIF               DMA_FLAG_TCIF3
 /* Exported macro ------------------------------------------------------------*/
 /* Select sNET: Chip Select pin low */
 #define sNET_CS_LOW()       GPIO_ResetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
 /* Deselect sNET: Chip Select pin high */
 #define sNET_CS_HIGH()      GPIO_SetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
 
+
+#define SPI_NET_DMA_ENABEL                       1
+#define SPI_NET_DMA_BUFFER_SIZE                  (1024*6)
 /* Exported functions ------------------------------------------------------- */
 
 /* High layer functions  */
@@ -114,6 +124,10 @@ void sNET_WaitForWriteEnd(void);
 void SPI_net_transfer_block(uint8_t *pBuffer_tx, uint16_t NumByteToTx,uint8_t *pBuffer_rx, uint16_t NumByteToRx);
 void SPI_set_slave_select(void);
 void SPI_clear_slave_select(void);
+void  spi_dma_data_buf_clear(void);
+void  spi_dma_put_data_buf(uint8_t *pdt, uint16_t len);
+void  spi_dma_write(void);
+void spi_dma_read(uint8_t *pRxBuf, uint16_t Rx_size);
 #ifdef __cplusplus
 }
 #endif
