@@ -547,7 +547,7 @@ void     w5500_send_flush(void)
 uint16_t  w5500_send( void)
 {
    unsigned int len_t;
-   unsigned int ret;
+   int ret;
    if (w5500_send_flush_flag == 0)
    {
       return 0;
@@ -588,6 +588,7 @@ uint16_t  w5500_send( void)
       w5500_send_flush_flag = 0;
        printf("net send end=%d\n", get_global_tick());
    }
+	  return 0;
 }
 
 void   w5500_send_put(char *p, uint32_t len)
@@ -610,12 +611,13 @@ void   w5500_send_put(char *p, uint32_t len)
 
 }
 uint32_t  state_update_count= 0 ;
+const uint8_t message[] = "Hello World";
 void NetLoop(void)
 {
-	unsigned char state, phy_cfgr;
-	unsigned short erx_len; //,etx_len;
+	unsigned char state;//, phy_cfgr;
+	// unsigned short erx_len; //,etx_len;
 	//unsigned char i,j=0,num=0;
-	uint8_t message[] = "Hello World";
+	
 	// phy_cfgr = getPHYCFGR();
 	// if (!(phy_cfgr & 0x1))
 	// {
@@ -624,7 +626,7 @@ void NetLoop(void)
 	// 	return;
 	// }
 
-   if(state_update_count++ > 10000)
+   if(state_update_count++ > 20000)
    {
       state = getSn_SR(0);
       state_update_count = 0;
@@ -634,7 +636,6 @@ void NetLoop(void)
       if(socket_state == Connect)
       {
          w5500_send();
-         // return;
       }
    }
 	//	debug("net",state);
@@ -655,7 +656,7 @@ void NetLoop(void)
 		{
 		case Disconnect:
 			socket_state = Connect;
-			SendSocketData(0, message, sizeof(message)); //向Server发送数据
+			SendSocketData(0, (uint8_t *)message, sizeof(message)); //向Server发送数据
 			break;
 
 		case Connect:
@@ -672,7 +673,7 @@ void NetLoop(void)
 			// {
 			// 	SendSocketData(0, message, sizeof(message)); //向Server发送数据
 			// }
-         w5500_send();
+         // w5500_send();
 			break;
 		default:
 			break;

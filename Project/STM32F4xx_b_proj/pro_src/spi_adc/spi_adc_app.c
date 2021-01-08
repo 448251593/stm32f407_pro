@@ -12,9 +12,10 @@ run_ctrl_struct     run_status_g = {
 	.time_sustain = 100,//ms 
 	.time_tick_ms = 0,
 	.sample_nums_count_all = 0,
+	.start_time_ticks = 0,
 };
 
-static uint32_t all_time_ticks = 0;
+
 uint32_t   sample_nums_count_all = 0;
 void   spi_adc_init(void)
 {
@@ -25,19 +26,23 @@ uint32_t ittt;
 uint16_t spi_adc_read(void)
 {
 
-	uint16_t addata1 = 0;
+uint16_t addata1 = 0;
 	// uint32_t i;
+	// 0000 0000- 0000 0000
 	addata1 = sADC_ReadByte();
-	ittt = addata1 << 2;
-	ittt = ittt >> 4;
-	// ittt = (ittt * 3300 / 4096);
+	
+	addata1 = (addata1 << 2) >> 4;
+	return addata1;
 
-	return (uint16_t)ittt;
+	// ittt = addata1 << 2;
+	// ittt = ittt >> 4;
+	// // ittt = (ittt * 3300 / 4096);
+	// return (uint16_t)ittt;
 }
 void  adc_read_start(void)
 {
 	run_status_g.status_s = 1;
-	all_time_ticks = get_global_tick();
+	run_status_g.start_time_ticks = get_global_tick();
 	sample_nums_count_all = 0;
 #if USART_DMA_TX_ENABEL
 	dma_start_times = 0;
@@ -61,7 +66,7 @@ uint32_t  sample_interval_count = 0;
 uint8_t  get_adc_interval_check(void)
 {
 	sample_interval_count++;
-	if(sample_interval_count > 1)
+	if(sample_interval_count > 0)
 	{
 		sample_interval_count = 0;
 		
@@ -101,7 +106,7 @@ void   get_adc_data_200khz(void)
 		// }
 
 
-		if(temp_tick - all_time_ticks >= run_status_g.time_sustain)
+		if(temp_tick - run_status_g.start_time_ticks >= run_status_g.time_sustain)
 		{
 			run_status_g.status_s = 0;
 			sample_nums_count = 0;
@@ -111,20 +116,16 @@ void   get_adc_data_200khz(void)
 
 	}
 	#else
-	//uint16_t   adc_t = 0;
-	uint8_t   sdt_ch[3] = {0};
+	uint16_t   addata1 = 0;
+
 	if (run_status_g.status_s == 1)
 	{
-		if (get_adc_interval_check() == 0)
-		{
-			return;
-		}
-		// sdt_ch[2] = ',0'?
-		temp_tick = get_global_tick();
 
-		*((uint16_t *)sdt_ch) = spi_adc_read();
-		sdt_ch[2] = sdt_ch[0];//add by bcg,2020-12-20 11:09:38 把高位调换到低位,改为大端发送
-		w5500_send_put((char*)&sdt_ch[1], 2);
+		addata1 = sADC_ReadByte();
+		addata1 = (addata1 << 2) >> 4;
+		w5500_send_put((char*)&addata1, 2);
+
+
 
 		sample_nums_count++;
 		sample_nums_count_all++;
@@ -136,22 +137,13 @@ void   get_adc_data_200khz(void)
 		}
 
 
-		// if (sample_nums_count >= NET_SEND_BUF_SIZE / 2)
-		// {
-
-		// 	run_status_g.status_s = 0;
-		// 	sample_nums_count = 0;
-		// 	LOG_INFO("sample_nums_count_all1=%d\n", sample_nums_count_all);
-		// 	LOG_INFO("end1=%d\n", temp_tick);
-		// }
-
-		if(temp_tick - all_time_ticks >= run_status_g.time_sustain)
+		if(run_status_g.time_tick_ms - run_status_g.start_time_ticks >= run_status_g.time_sustain)
 		{
 			run_status_g.status_s = 0;
 			sample_nums_count = 0;
 			w5500_send_flush();
 			LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
-			LOG_INFO ("end=%d\n",temp_tick);
+			LOG_INFO ("end=%d\n",run_status_g.time_tick_ms);
 		}
 
 	}

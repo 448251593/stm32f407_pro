@@ -8,6 +8,7 @@ typedef struct
 	uint32_t    time_sustain;//add by bcg,2020-11-30 20:28:06 持续多长时间 us
 	uint32_t 	time_tick_ms;//add by bcg,2020-12-20 19:31:39  sysytem ticks ms
 	uint32_t    sample_nums_count_all;
+	uint32_t    start_time_ticks;
 }run_ctrl_struct;
 extern run_ctrl_struct     run_status_g;
 uint16_t spi_adc_read(void);

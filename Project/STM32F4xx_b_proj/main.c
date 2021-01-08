@@ -99,7 +99,7 @@ int main(void)
 	// usart3_send_data("1234567", 7);
 	while (1)
 	{
-		tmp_count = get_global_tick();
+		// tmp_count = get_global_tick();
 		// led_toggle(LED_Y);
 		// led_toggle(LED_O);
 		// Delay(1);

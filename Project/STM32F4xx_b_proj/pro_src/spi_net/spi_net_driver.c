@@ -277,9 +277,13 @@ void spi_dma_start(void)
 
 	/* Waiting the end of Data transfer */
 	while (DMA_GetFlagStatus(sNET_TX_DMA_STREAM, sNET_TX_DMA_FLAG_TCIF) == RESET)
-		;
+	{
+		get_adc_data_200khz();
+	}
 	while (DMA_GetFlagStatus(sNET_RX_DMA_STREAM, sNET_RX_DMA_FLAG_TCIF) == RESET)
-		;
+	{
+		get_adc_data_200khz();
+	}
 
 	/* Clear DMA Transfer Complete Flags */
 	DMA_ClearFlag(sNET_TX_DMA_STREAM, sNET_TX_DMA_FLAG_TCIF);

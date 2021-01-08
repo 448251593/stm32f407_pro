@@ -334,6 +334,56 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	return data[0];
 }
 
+uint16_t wiz_write_buf_for_send(uint32_t addrbsb, uint8_t *buf, uint16_t len)
+{
+
+	unsigned char cmd_buffer[10];
+	// CS=0, SPI start
+	SPI_set_slave_select();
+
+
+#if SPI_NET_DMA_ENABEL
+	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
+	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
+	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
+	spi_dma_data_buf_clear();
+	spi_dma_put_data_buf(cmd_buffer, 3);
+	spi_dma_put_data_buf(buf, len);
+	spi_dma_write();
+#else
+	uint16_t idx = 0;
+	unsigned char  *p_buffer;
+	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
+	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
+	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
+	//
+	idx = 3;
+	p_buffer = cmd_buffer;
+	while (idx--)
+	{
+		sNET_SendByte(*p_buffer++);
+	}
+	//---------------
+	idx = len;
+	p_buffer = buf;
+	while (idx--)
+	{
+		sNET_SendByte(*p_buffer++);
+	}
+#endif
+
+
+
+
+
+	//  wait_ready();
+	SPI_clear_slave_select();
+
+	//  IINCHIP_ISR_ENABLE();                         // Interrupt Service Routine Enable
+
+	return len;
+}
+
 uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 {
 
