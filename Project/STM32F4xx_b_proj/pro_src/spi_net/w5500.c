@@ -28,12 +28,12 @@ RJ45_config_struct  RJ45_config = {0};
 
 //spi_instance_t _net_core_spi;
 
-unsigned char const default_server_ip[] = {192, 168, 2, 112};
-unsigned char const default_client_ip[] = {192, 168, 2, 100};
+unsigned char const default_server_ip[] = {192, 168, 0, 112};
+unsigned char const default_client_ip[] = {192, 168, 0, 100};
 unsigned short const default_server_port[] = {6800};
 unsigned char const default_mask[] = {255, 255, 255, 0};
-unsigned char const default_gateway[4] = {192, 168, 2, 254};
-unsigned char const default_mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+unsigned char const default_gateway[4] = {192, 168, 0, 1};
+unsigned char const default_mac[6] ={0x02,0x53,0x78,0xD1,0xAB,0x44};// {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
 static uint8_t I_STATUS[8];
 static uint16_t SSIZE[8]; /**< Max Tx buffer size by each channel */

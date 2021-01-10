@@ -600,17 +600,14 @@ uint16_t  w5500_send( void)
    unsigned int len_t;
    int ret;
    uint8_t *p_tmp = 0;
-   if (w5500_send_flush_flag == 0)
+
+   // len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
+   // len_t = spi_net_send_Fifo.cnt;
+   if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
    {
-      return 0;
-   }
-   len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
-   if (len_t > 0)
-   {
-      if (len_t >= DATA_BUF_SIZE)
-      {
+      // if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
          len_t = DATA_BUF_SIZE;
-      }
+      
 
       __disable_irq(); //关闭总中断
       p_tmp = rx_buf;
@@ -618,6 +615,10 @@ uint16_t  w5500_send( void)
       __enable_irq(); //打开总中断
 
       ret = send_for_dma(0, p_tmp, len_t+3);
+
+      // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
+      // extern unsigned short const default_server_port[]; //= {6800};
+      // ret = sendto_for_dma(0, p_tmp, len_t + 3,(uint8_t*) default_server_ip, (unsigned short)default_server_port);
       if (ret > 0)
       {
          ft_fifo_setoffset(&spi_net_send_Fifo, ret);
@@ -632,8 +633,34 @@ uint16_t  w5500_send( void)
    }
    else
    {
-      w5500_send_flush_flag = 0;
-       printf("net send end=%d\n", get_global_tick());
+      if (w5500_send_flush_flag == 1)
+      {
+         w5500_send_flush_flag = 0;
+         len_t = spi_net_send_Fifo.cnt;
+
+         __disable_irq(); //关闭总中断
+         p_tmp = rx_buf;
+         ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
+         __enable_irq(); //打开总中断
+
+         ret = send_for_dma(0, p_tmp, len_t + 3);
+
+         // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
+         // extern unsigned short const default_server_port[]; //= {6800};
+         // ret = sendto_for_dma(0, p_tmp, len_t + 3,(uint8_t*) default_server_ip, (unsigned short)default_server_port);
+         if (ret > 0)
+         {
+            ft_fifo_setoffset(&spi_net_send_Fifo, ret);
+            // w5500_send_flush_flag = 0;
+         }
+         else if (ret < 0)
+         {
+            close(0);
+            socket_state = Disconnect;
+         }
+         printf("net send end=%d\n", get_global_tick());
+      }
+      
    }
 	  return 0;
 }
@@ -641,18 +668,18 @@ uint16_t  w5500_send( void)
 void   w5500_send_put(char *p, uint32_t len)
 {
 
-    unsigned  int  templen;
+   //  unsigned  int  templen;
     // CPU_SR_ALLOC();
     // CPU_CRITICAL_ENTER();
     __disable_irq() ; //关闭总中断
 
 
-    templen = ft_fifo_getlenth(&spi_net_send_Fifo);
+   //  templen = ft_fifo_getlenth(&spi_net_send_Fifo);
 
-    if (len + templen <= NET_SEND_BUF_SIZE - 1)
-    {
+   //  if (len + templen <= NET_SEND_BUF_SIZE - 1)
+   //  {
         ft_fifo_put(&spi_net_send_Fifo,(unsigned char *) p, len);
-    }
+   //  }
     // CPU_CRITICAL_EXIT();
     __enable_irq() ; //打开总中断
 
