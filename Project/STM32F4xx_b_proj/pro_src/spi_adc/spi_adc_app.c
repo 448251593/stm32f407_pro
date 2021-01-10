@@ -123,9 +123,8 @@ void   get_adc_data_200khz(void)
 
 		addata1 = sADC_ReadByte();
 		addata1 = (addata1 << 2) >> 4;
+		addata1 = (addata1>>8)+(addata1<<8);
 		w5500_send_put((char*)&addata1, 2);
-
-
 
 		sample_nums_count++;
 		sample_nums_count_all++;

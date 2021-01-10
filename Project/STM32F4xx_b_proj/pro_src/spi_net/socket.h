@@ -36,7 +36,7 @@ enum socket_connect_flag
  #ifndef DATA_BUF_SIZE
 	#define DATA_BUF_SIZE			(1024*6)//SPI_NET_DMA_BUFFER_SIZE //(1024*6)
 #endif
-#define   NET_SEND_BUF_SIZE      1024*60//
+#define   NET_SEND_BUF_SIZE      1024*80//
 extern uint16_t   socket_state;
 extern uint16_t   heart_beat_time;
 extern uint16_t   protocal_overtime;
@@ -44,5 +44,6 @@ extern uint16_t   rx_tail;
 void NetLoop(void);
 void   w5500_send_put(char *p, uint32_t len);
 void      w5500_fifo_init(void);
+unsigned short send_for_dma(SOCKET s, const uint8_t * buf, unsigned short len);
 #endif
 /* _SOCKET_H_ */

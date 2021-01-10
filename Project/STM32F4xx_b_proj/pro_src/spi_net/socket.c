@@ -201,6 +201,57 @@ void disconnect(SOCKET s)
    /* ------- */
 }
 
+unsigned short send_for_dma(SOCKET s, const uint8_t * buf, unsigned short len)
+{
+  uint8_t status=0;
+  unsigned short ret=0;
+  unsigned short freesize=0;
+   //add by bcg,2021-01-10 16:23:13 先去除cmd 长度
+  len = len - 3;
+
+  if (len > getIINCHIP_TxMAX(s)) ret = getIINCHIP_TxMAX(s); // check size not to exceed MAX size.
+  else ret = len;
+
+  // if freebuf is available, start.
+  do
+  {
+    freesize = getSn_TX_FSR(s);
+    status = IINCHIP_READ(Sn_SR(s));
+    if ((status != SOCK_ESTABLISHED) && (status != SOCK_CLOSE_WAIT))
+    {
+      ret = 0;
+      break;
+    }
+  } while (freesize < ret);
+
+
+  // copy data
+  send_data_processing_for_dma(s, (uint8_t *)buf, ret);
+  IINCHIP_WRITE( Sn_CR(s) ,Sn_CR_SEND);
+
+  /* wait to process the command... */
+  while( IINCHIP_READ(Sn_CR(s) ) );
+
+  while ( (IINCHIP_READ(Sn_IR(s) ) & Sn_IR_SEND_OK) != Sn_IR_SEND_OK )
+  {
+    status = IINCHIP_READ(Sn_SR(s));
+    if ((status != SOCK_ESTABLISHED) && (status != SOCK_CLOSE_WAIT) )
+    {
+   //   LOG_INFO("SEND_OK Problem!!\r\n");
+      close(s);
+      return 0;
+    }
+  }
+  IINCHIP_WRITE( Sn_IR(s) , Sn_IR_SEND_OK);
+
+#ifdef __DEF_IINCHIP_INT__
+  // putISR(s, getISR(s) & (~Sn_IR_SEND_OK));
+#else
+   IINCHIP_WRITE( Sn_IR(s) , Sn_IR_SEND_OK);
+#endif
+
+   return ret;
+}
 
 ///**
 //@brief   This function used to send the data in TCP mode
@@ -533,7 +584,7 @@ FT_FIFO              spi_net_send_Fifo;
 unsigned char        spi_net_send_Buf[NET_SEND_BUF_SIZE];
 uint8_t     w5500_send_flush_flag = 0;
 
-uint8_t rx_buf[DATA_BUF_SIZE];
+uint8_t rx_buf[DATA_BUF_SIZE+3];
 void      w5500_fifo_init(void)
 {
       ft_fifo_init(&spi_net_send_Fifo, spi_net_send_Buf, NET_SEND_BUF_SIZE);
@@ -548,6 +599,7 @@ uint16_t  w5500_send( void)
 {
    unsigned int len_t;
    int ret;
+   uint8_t *p_tmp = 0;
    if (w5500_send_flush_flag == 0)
    {
       return 0;
@@ -559,18 +611,13 @@ uint16_t  w5500_send( void)
       {
          len_t = DATA_BUF_SIZE;
       }
-#if 0
-      ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
-      ret = SendSocketData(0, rx_buf , len_t);
-      // SendSocketData(0, message, sizeof(message)); //向Server发送数据;
-      if (ret == 0)
-      {
-         ft_fifo_setoffset(&spi_net_send_Fifo, len_t);
-         w5500_send_flush_flag = 0;
-      }
-#else
-      ft_fifo_seek(&spi_net_send_Fifo, rx_buf, 0, len_t);
-      ret = send(0, rx_buf, len_t);
+
+      __disable_irq(); //关闭总中断
+      p_tmp = rx_buf;
+      ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
+      __enable_irq(); //打开总中断
+
+      ret = send_for_dma(0, p_tmp, len_t+3);
       if (ret > 0)
       {
          ft_fifo_setoffset(&spi_net_send_Fifo, ret);
@@ -581,7 +628,7 @@ uint16_t  w5500_send( void)
          close(0);
          socket_state = Disconnect;
       }
-#endif
+
    }
    else
    {

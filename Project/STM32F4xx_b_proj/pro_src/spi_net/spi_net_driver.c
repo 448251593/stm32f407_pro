@@ -305,6 +305,25 @@ void spi_dma_start(void)
 	SPI_Cmd(sNET_SPI, DISABLE);
 
 }
+void  spi_dma_write_for_send(uint8_t *pbuf, uint32_t data_size)
+{
+	DMA_InitStructure.DMA_BufferSize = data_size;
+	/* Configure TX DMA */
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_Channel = sNET_TX_DMA_CHANNEL;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)pbuf;
+	DMA_Init(sNET_TX_DMA_STREAM, &DMA_InitStructure);
+
+	/* Configure RX DMA */
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+	DMA_InitStructure.DMA_Channel = sNET_RX_DMA_CHANNEL;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)pTmpBufread;
+	DMA_Init(sNET_RX_DMA_STREAM, &DMA_InitStructure);
+
+	spi_dma_start();
+}
 void  spi_dma_write(void)
 {
 	DMA_InitStructure.DMA_BufferSize = pTmpBuf1_size;

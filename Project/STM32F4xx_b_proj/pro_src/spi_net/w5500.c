@@ -28,11 +28,11 @@ RJ45_config_struct  RJ45_config = {0};
 
 //spi_instance_t _net_core_spi;
 
-unsigned char const default_server_ip[] = {192, 168, 0, 112};
-unsigned char const default_client_ip[] = {192, 168, 0, 100};
+unsigned char const default_server_ip[] = {192, 168, 2, 112};
+unsigned char const default_client_ip[] = {192, 168, 2, 100};
 unsigned short const default_server_port[] = {6800};
 unsigned char const default_mask[] = {255, 255, 255, 0};
-unsigned char const default_gateway[4] = {192, 168, 0, 254};
+unsigned char const default_gateway[4] = {192, 168, 2, 254};
 unsigned char const default_mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
 static uint8_t I_STATUS[8];
@@ -334,7 +334,7 @@ uint8_t IINCHIP_READ(uint32_t addrbsb)
 	return data[0];
 }
 
-uint16_t wiz_write_buf_for_send(uint32_t addrbsb, uint8_t *buf, uint16_t len)
+uint16_t wiz_write_buf_for_dma(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 {
 
 	unsigned char cmd_buffer[10];
@@ -346,10 +346,11 @@ uint16_t wiz_write_buf_for_send(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 	cmd_buffer[0] = (addrbsb & 0x00FF0000) >> 16; // Address byte 1
 	cmd_buffer[1] = (addrbsb & 0x0000FF00) >> 8;
 	cmd_buffer[2] = (addrbsb & 0x000000F8) + 4;
-	spi_dma_data_buf_clear();
-	spi_dma_put_data_buf(cmd_buffer, 3);
-	spi_dma_put_data_buf(buf, len);
-	spi_dma_write();
+	// spi_dma_data_buf_clear();
+	// spi_dma_put_data_buf(cmd_buffer, 3);
+	// spi_dma_put_data_buf(buf, len);
+	memcpy(buf, cmd_buffer , 3);
+	spi_dma_write_for_send(buf, len+3);
 #else
 	uint16_t idx = 0;
 	unsigned char  *p_buffer;
@@ -371,11 +372,6 @@ uint16_t wiz_write_buf_for_send(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 		sNET_SendByte(*p_buffer++);
 	}
 #endif
-
-
-
-
-
 	//  wait_ready();
 	SPI_clear_slave_select();
 
@@ -383,6 +379,8 @@ uint16_t wiz_write_buf_for_send(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 
 	return len;
 }
+
+
 
 uint16_t wiz_write_buf(uint32_t addrbsb, uint8_t *buf, uint16_t len)
 {
@@ -756,7 +754,26 @@ uint16_t getSn_RX_RSR(SOCKET s)
 	} while (val != val1);
 	return val;
 }
+void send_data_processing_for_dma(SOCKET s, uint8_t *data, uint16_t len)
+{
+	uint16_t ptr = 0;
+	uint32_t addrbsb = 0;
+	if (len == 0)
+	{
+		//DBG("CH: %d Unexpected1 length 0\r\n", s);
+		return;
+	}
 
+	ptr = IINCHIP_READ(Sn_TX_WR0(s));
+	ptr = ((ptr & 0x00ff) << 8) + IINCHIP_READ(Sn_TX_WR1(s));
+
+	addrbsb = ((uint32_t)ptr << 8) + (s << 5) + 0x10;
+	wiz_write_buf_for_dma(addrbsb, data, len);
+
+	ptr += len;
+	IINCHIP_WRITE(Sn_TX_WR0(s), (uint8_t)((ptr & 0xff00) >> 8));
+	IINCHIP_WRITE(Sn_TX_WR1(s), (uint8_t)(ptr & 0x00ff));
+}
 ///**
 //@brief   This function is being called by send() and sendto() function also.
 

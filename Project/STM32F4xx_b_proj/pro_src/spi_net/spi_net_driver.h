@@ -128,6 +128,7 @@ void  spi_dma_data_buf_clear(void);
 void  spi_dma_put_data_buf(uint8_t *pdt, uint16_t len);
 void  spi_dma_write(void);
 void spi_dma_read(uint8_t *pRxBuf, uint16_t Rx_size);
+uint8_t* get_spi_dma_data_entry(void);
 #ifdef __cplusplus
 }
 #endif

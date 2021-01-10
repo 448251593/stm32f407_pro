@@ -417,4 +417,6 @@ void setSn_IR(uint8_t s, uint8_t val);
 //#define WIZCHIP_OFFSET_INC(ADDR, N)    (ADDR + (N<<8)) //< Increase offset address
 void W5500_net_init(void);
 
+void send_data_processing_for_dma(SOCKET s, uint8_t *data, uint16_t len);
+uint16_t wiz_write_buf_for_dma(uint32_t addrbsb, uint8_t *buf, uint16_t len);
 #endif
