@@ -36,7 +36,7 @@ enum socket_connect_flag
  #ifndef DATA_BUF_SIZE
 	#define DATA_BUF_SIZE			(1024*6)//SPI_NET_DMA_BUFFER_SIZE //(1024*6)
 #endif
-#define   NET_SEND_BUF_SIZE      1024*80//
+#define   NET_SEND_BUF_SIZE      1024*100//
 extern uint16_t   socket_state;
 extern uint16_t   heart_beat_time;
 extern uint16_t   protocal_overtime;

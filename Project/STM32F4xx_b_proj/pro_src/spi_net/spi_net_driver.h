@@ -95,10 +95,11 @@
 #define sNET_RX_DMA_FLAG_TCIF               DMA_FLAG_TCIF3
 /* Exported macro ------------------------------------------------------------*/
 /* Select sNET: Chip Select pin low */
-#define sNET_CS_LOW()       GPIO_ResetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
+//#define sNET_CS_LOW()       GPIO_ResetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
+#define sNET_CS_LOW()       sNET_CS_GPIO_PORT->BSRRH = sNET_CS_PIN;
 /* Deselect sNET: Chip Select pin high */
-#define sNET_CS_HIGH()      GPIO_SetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
-
+//#define sNET_CS_HIGH()      GPIO_SetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
+#define sNET_CS_HIGH()      sNET_CS_GPIO_PORT->BSRRL = sNET_CS_PIN;
 
 #define SPI_NET_DMA_ENABEL                       1
 #define SPI_NET_DMA_BUFFER_SIZE                  (1024*6)

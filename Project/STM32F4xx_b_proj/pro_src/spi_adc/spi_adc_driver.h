@@ -105,9 +105,12 @@ typedef enum{
 
 /* Exported macro ------------------------------------------------------------*/
 /* Select sADC: Chip Select pin low */
-#define sADC_CS_LOW()       GPIO_ResetBits(sADC_CS_GPIO_PORT, sADC_CS_PIN)
+//#define sADC_CS_LOW()       GPIO_ResetBits(sADC_CS_GPIO_PORT, sADC_CS_PIN)
+#define sADC_CS_LOW()       GPIOA->BSRRH = sADC_CS_PIN;
 /* Deselect sADC: Chip Select pin high */
-#define sADC_CS_HIGH()      GPIO_SetBits(sADC_CS_GPIO_PORT, sADC_CS_PIN)
+//#define sADC_CS_HIGH()      GPIO_SetBits(sADC_CS_GPIO_PORT, sADC_CS_PIN)
+#define sADC_CS_HIGH()      GPIOA->BSRRL = sADC_CS_PIN;
+
 
 /* Exported functions ------------------------------------------------------- */
 

@@ -688,20 +688,20 @@ uint32_t  state_update_count= 0 ;
 const uint8_t message[] = "Hello World";
 void NetLoop(void)
 {
-	unsigned char state;//, phy_cfgr;
+	unsigned char state,phy_cfgr;
 	// unsigned short erx_len; //,etx_len;
 	//unsigned char i,j=0,num=0;
 	
-	// phy_cfgr = getPHYCFGR();
-	// if (!(phy_cfgr & 0x1))
-	// {
-	// 	disconnect(0);
-	// 	socket_state = Connect_none;
-	// 	return;
-	// }
 
    if(state_update_count++ > 20000)
    {
+      phy_cfgr = getPHYCFGR();
+      if (!(phy_cfgr & 0x1))
+      {
+         disconnect(0);
+         socket_state = Connect_none;
+         return;
+      }
       state = getSn_SR(0);
       state_update_count = 0;
    }
