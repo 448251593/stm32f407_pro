@@ -195,6 +195,16 @@
           <WinNumber>1</WinNumber>
           <ItemText>Usart3SndBuf</ItemText>
         </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pTmpBuf1</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pTmpBuf1_size</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
@@ -650,7 +660,7 @@
 
   <Group>
     <GroupName>spi_net</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1371,62 +1381,6 @@
       <bDave2>0</bDave2>
       <PathWithFileName>../../../Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/arm/startup_stm32f429_439xx.s</PathWithFileName>
       <FilenameWithoutPath>startup_stm32f429_439xx.s</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-  </Group>
-
-  <Group>
-    <GroupName>w5500_offical_code</GroupName>
-    <tvExp>1</tvExp>
-    <tvExpOptDlg>0</tvExpOptDlg>
-    <cbSel>0</cbSel>
-    <RteFlg>0</RteFlg>
-    <File>
-      <GroupNumber>11</GroupNumber>
-      <FileNumber>75</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_net_w5500_offical\loopback.c</PathWithFileName>
-      <FilenameWithoutPath>loopback.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>11</GroupNumber>
-      <FileNumber>76</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_net_w5500_offical\socket.c</PathWithFileName>
-      <FilenameWithoutPath>socket.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>11</GroupNumber>
-      <FileNumber>77</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_net_w5500_offical\w5500.c</PathWithFileName>
-      <FilenameWithoutPath>w5500.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>11</GroupNumber>
-      <FileNumber>78</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</PathWithFileName>
-      <FilenameWithoutPath>wizchip_conf.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

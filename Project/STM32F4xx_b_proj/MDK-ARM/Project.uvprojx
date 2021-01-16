@@ -707,7 +707,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
+                  <IncludeInBuild>1</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -763,7 +763,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
+                  <IncludeInBuild>1</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1699,31 +1699,6 @@
                   </Aads>
                 </FileArmAds>
               </FileOption>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>w5500_offical_code</GroupName>
-          <Files>
-            <File>
-              <FileName>loopback.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\loopback.c</FilePath>
-            </File>
-            <File>
-              <FileName>socket.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\socket.c</FilePath>
-            </File>
-            <File>
-              <FileName>w5500.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\w5500.c</FilePath>
-            </File>
-            <File>
-              <FileName>wizchip_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3169,31 +3144,6 @@
                   </Aads>
                 </FileArmAds>
               </FileOption>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>w5500_offical_code</GroupName>
-          <Files>
-            <File>
-              <FileName>loopback.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\loopback.c</FilePath>
-            </File>
-            <File>
-              <FileName>socket.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\socket.c</FilePath>
-            </File>
-            <File>
-              <FileName>w5500.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\w5500.c</FilePath>
-            </File>
-            <File>
-              <FileName>wizchip_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
             </File>
           </Files>
         </Group>

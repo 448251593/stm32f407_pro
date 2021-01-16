@@ -601,6 +601,10 @@ uint16_t  w5500_send( void)
    int ret;
    uint8_t *p_tmp = 0;
 
+   if(w5500_send_flush_flag == 0)
+   {
+      return 0;
+   }
    // len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
    // len_t = spi_net_send_Fifo.cnt;
    if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
@@ -689,7 +693,7 @@ const uint8_t message[] = "Hello World";
 void NetLoop(void)
 {
 	unsigned char state,phy_cfgr;
-	// unsigned short erx_len; //,etx_len;
+	unsigned short erx_len; //,etx_len;
 	//unsigned char i,j=0,num=0;
 	
 
@@ -745,7 +749,7 @@ void NetLoop(void)
 			// }
 			// if (heart_beat_time >= HEART_BEAT_CNT_MAX)
 			// {
-			// 	SendSocketData(0, message, sizeof(message)); //向Server发送数据
+			// 	SendSocketData(0, (uint8_t *)message, sizeof(message)); //向Server发送数据
 			// }
          // w5500_send();
 			break;

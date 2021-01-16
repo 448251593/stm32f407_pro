@@ -65,14 +65,20 @@ uint16_t  sample_nums_count = 0;
 uint32_t  sample_interval_count = 0;
 uint8_t  get_adc_interval_check(void)
 {
+	
+	int i;
 	sample_interval_count++;
-	if(sample_interval_count > 0)
+	if(sample_interval_count > 2)
 	{
 		sample_interval_count = 0;
 		
 		return 1;
 	}
-	// __NOP();
+	for(i = 0; i <  6; i++)
+	{
+		__NOP();
+	}
+	
 	return 0;
 }
 void   get_adc_data_200khz(void)
@@ -120,7 +126,10 @@ void   get_adc_data_200khz(void)
 
 	if (run_status_g.status_s == 1)
 	{
-
+		if (get_adc_interval_check() == 0)
+		{
+			return;
+		}
 		addata1 = sADC_ReadByte();
 		addata1 = (addata1 << 2) >> 4;
 		addata1 = (addata1>>8)+(addata1<<8);
@@ -134,6 +143,14 @@ void   get_adc_data_200khz(void)
 		// 	sample_nums_count = 0;
 		// 	w5500_send_flush();
 		// }
+		if(sample_nums_count >= NET_SEND_BUF_SIZE / 2)
+		{
+			run_status_g.status_s = 0;
+			sample_nums_count = 0;
+			w5500_send_flush();
+			LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
+			LOG_INFO ("end=%d\n",run_status_g.time_tick_ms);
+		}
 
 
 		if(run_status_g.time_tick_ms - run_status_g.start_time_ticks >= run_status_g.time_sustain)
