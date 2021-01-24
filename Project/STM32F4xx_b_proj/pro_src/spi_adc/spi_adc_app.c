@@ -74,7 +74,7 @@ uint8_t  get_adc_interval_check(void)
 		
 		return 1;
 	}
-	for(i = 0; i <  6; i++)
+	for(i = 0; i <  5; i++)
 	{
 		__NOP();
 	}
@@ -137,7 +137,7 @@ void   get_adc_data_200khz(void)
 
 		sample_nums_count++;
 		sample_nums_count_all++;
-		
+		__NOP();
 		// if(sample_nums_count >= DATA_BUF_SIZE / 2)
 		// {
 		// 	sample_nums_count = 0;

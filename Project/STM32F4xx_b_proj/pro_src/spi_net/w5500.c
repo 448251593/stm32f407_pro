@@ -33,7 +33,7 @@ unsigned char const default_client_ip[] = {192, 168, 0, 100};
 unsigned short const default_server_port[] = {6800};
 unsigned char const default_mask[] = {255, 255, 255, 0};
 unsigned char const default_gateway[4] = {192, 168, 0, 1};
-unsigned char const default_mac[6] ={0x02,0x53,0x78,0xD1,0xAB,0x44};// {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+unsigned char const default_mac[6] ={0xe0,0xdc,0xff,0xca,0x42,0xff};// {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
 
 static uint8_t I_STATUS[8];
 static uint16_t SSIZE[8]; /**< Max Tx buffer size by each channel */
@@ -44,7 +44,7 @@ uint8_t rxsize[8] = {8, 2, 2, 2, 2, 0, 0, 0};
 
 void W5500_net_init(void)
 {
-
+ 
 	//   MSS_GPIO_set_output(rst_W5500,0);
 	//   delay_ms(100);
 	//   MSS_GPIO_set_output(rst_W5500,1);
@@ -61,6 +61,22 @@ void W5500_net_init(void)
 	socket_state = Disconnect;
 	RJ45_config.enable = 0;
 	heart_beat_time = 0x00;
+	iinchip_init();
+
+#define PHYCFGR_LNK_ON (1 << 0)
+	if (getPHYCFGR() & PHYCFGR_LNK_ON)
+		//   tmp = PHY_LINK_ON;
+		printf("PHY_LINK_ON\n");
+	else
+		//   tmp = PHY_LINK_OFF;
+		printf("PHY_LINK_OFF\n");
+	if (getPHYCFGR() & PHYCFGR_LNK_ON)
+		//   tmp = PHY_LINK_ON;
+		printf("PHY_LINK_ON1\n");
+	else
+		//   tmp = PHY_LINK_OFF;
+		printf("PHY_LINK_OFF1\n");
+
 	NetInit();
 
 }

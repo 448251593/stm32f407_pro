@@ -45,4 +45,5 @@ uint8_t usart3_put_fifo(uint8_t pdt);
 uint8_t usart3_parse_cmd(void);
 uint32_t  usart3_dma_get_fifo_data(uint8_t *pout, uint32_t  size);
 void  usart3send_flush(void);
+void  parse_data_handle(uint8_t *pdat, uint16_t len);
 #endif

@@ -690,12 +690,71 @@ void   w5500_send_put(char *p, uint32_t len)
 }
 uint32_t  state_update_count= 0 ;
 const uint8_t message[] = "Hello World";
+
+
+int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
+{
+   int32_t  ret;
+   uint16_t size, sentsize;
+   uint8_t  destip[4]={192, 168, 0, 112};
+   uint16_t destport = 6800;
+
+   switch(getSn_SR(sn))
+   {
+      case SOCK_UDP :
+         sendto(sn, buf, 5, destip, destport);
+//          if((size = getSn_RX_RSR(sn)) > 0)
+//          {
+//             if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
+//             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+//             if(ret <= 0)
+//             {
+// #ifdef 1
+//                printf("%d: recvfrom error. %ld\r\n",sn,ret);
+// #endif
+//                return ret;
+//             }
+//             size = (uint16_t) ret;
+//             sentsize = 0;
+//             while(sentsize != size)
+//             {
+//                ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport);
+//                if(ret < 0)
+//                {
+// #ifdef 1
+//                   printf("%d: sendto error. %ld\r\n",sn,ret);
+// #endif
+//                   return ret;
+//                }
+//                sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
+//             }
+//          }
+         break;
+      case SOCK_CLOSED:
+#if 1
+         printf("%d:UDP loopback start\r\n",sn);
+#endif
+         if((ret = socket(sn, Sn_MR_UDP, port, 0x00)) != sn)
+            return ret;
+#if 1
+         printf("%d:Opened, UDP loopback, port [%d]\r\n", sn, port);
+#endif
+         break;
+      default :
+         break;
+   }
+   return 1;
+}
+void start_send_udp_msg(void)
+{
+   loopback_udps(1, "hello", 5);
+}
 void NetLoop(void)
 {
 	unsigned char state,phy_cfgr;
 	unsigned short erx_len; //,etx_len;
 	//unsigned char i,j=0,num=0;
-	
+	     
 
    if(state_update_count++ > 20000)
    {
@@ -738,15 +797,16 @@ void NetLoop(void)
 			break;
 
 		case Connect:
-			// erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
-			// if (erx_len > 0)
-			// {
-			// 	recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
-			// 	rx_tail = rx_tail + erx_len;
-			// 	protocal_overtime = 0;
-			// 	recv_buf[rx_tail++] = 0x00;
-			// 	RJ45_config.enable = 1;
-			// }
+			erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
+			if (erx_len > 0)
+			{
+				recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
+            parse_data_handle(recv_buf, erx_len);
+				// rx_tail = rx_tail + erx_len;
+				// protocal_overtime = 0;
+				// recv_buf[rx_tail++] = 0x00;
+				// RJ45_config.enable = 1;
+			}
 			// if (heart_beat_time >= HEART_BEAT_CNT_MAX)
 			// {
 			// 	SendSocketData(0, (uint8_t *)message, sizeof(message)); //向Server发送数据

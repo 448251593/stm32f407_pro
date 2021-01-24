@@ -419,4 +419,6 @@ void W5500_net_init(void);
 
 void send_data_processing_for_dma(SOCKET s, uint8_t *data, uint16_t len);
 uint16_t wiz_write_buf_for_dma(uint32_t addrbsb, uint8_t *buf, uint16_t len);
+
+extern unsigned char const default_server_ip[];
 #endif
