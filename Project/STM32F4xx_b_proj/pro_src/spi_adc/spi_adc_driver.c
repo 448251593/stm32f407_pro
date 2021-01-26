@@ -74,7 +74,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void sADC_LowLevel_DeInit(void);
 void sADC_LowLevel_Init(void);
-
+void s_adc_gain_pin_init(void);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -122,7 +122,7 @@ void sADC_Init(void)
 #endif
 
 
-
+  s_adc_gain_pin_init();
 
 }
 #if SPI_ADC_DMA_ENABLE
@@ -395,7 +395,7 @@ void s_adc_gain_pin_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	/*!< Enable GPIO clocks */
-	  RCC_AHB1PeriphClockCmd(sADC_GAIN1_GPIO_CLK| RCC_AHB1Periph_GPIOB, ENABLE);
+	  RCC_AHB1PeriphClockCmd(sADC_GAIN1_GPIO_CLK| sADC_GAIN0_GPIO_CLK, ENABLE);
 
 	/*!< Configure sADC Card CS pin in output pushpull mode ********************/
 	GPIO_InitStructure.GPIO_Pin = sADC_GAIN1_PIN|sADC_GAIN0_PIN;
@@ -414,11 +414,11 @@ void s_adc_gain_set(ADC_GAIN_ENUM id)
     GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
     GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
-  case ADC_GAIN_1:
+  case ADC_GAIN_2:
     GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
     GPIO_SetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
-  case ADC_GAIN_2:
+  case ADC_GAIN_1:
     GPIO_SetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
     GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;

@@ -601,10 +601,10 @@ uint16_t  w5500_send( void)
    int ret;
    uint8_t *p_tmp = 0;
 
-   if(w5500_send_flush_flag == 0)
-   {
-      return 0;
-   }
+  if(w5500_send_flush_flag == 0)
+  {
+     return 0;
+  }
    // len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
    // len_t = spi_net_send_Fifo.cnt;
    if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
@@ -800,6 +800,7 @@ void NetLoop(void)
 			erx_len = getSn_RX_RSR(0); //len为已接收数据的大小
 			if (erx_len > 0)
 			{
+            memset(recv_buf, 0, sizeof(recv_buf));
 				recv(0, recv_buf, erx_len); //W5500接收来自Sever的数据
             parse_data_handle(recv_buf, erx_len);
 				// rx_tail = rx_tail + erx_len;
