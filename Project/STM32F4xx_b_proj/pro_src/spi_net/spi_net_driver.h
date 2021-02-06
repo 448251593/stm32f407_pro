@@ -29,7 +29,7 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __SPI_NET_DRIVER_H
 #define __SPI_NET_DRIVER_H
-
+#include "socket.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -102,7 +102,7 @@
 #define sNET_CS_HIGH()      sNET_CS_GPIO_PORT->BSRRL = sNET_CS_PIN;
 
 #define SPI_NET_DMA_ENABEL                       1
-#define SPI_NET_DMA_BUFFER_SIZE                  (1024*6)
+#define SPI_NET_DMA_BUFFER_SIZE                  DATA_BUF_SIZE//(1024*6)
 /* Exported functions ------------------------------------------------------- */
 
 /* High layer functions  */

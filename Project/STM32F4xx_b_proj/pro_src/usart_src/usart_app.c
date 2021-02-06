@@ -203,7 +203,7 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
         {
             extern void adc_read_start(void);
             adc_read_start();
-            LOG_INFO("start=%d\n", get_global_tick());
+            // LOG_INFO("start=%d\n", get_global_tick());
         }
         p2 = strstr((p1), "read");
         if (p2)
