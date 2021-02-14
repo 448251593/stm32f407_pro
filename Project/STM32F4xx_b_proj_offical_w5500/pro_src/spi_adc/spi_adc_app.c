@@ -6,6 +6,7 @@
 #include "tim9_driver.h"
 #include "usart_app.h"
 #include "socket.h"
+#include "loopback.h"
 run_ctrl_struct     run_status_g = {
 	.status_s = 0,
 	.min_period = 1,
@@ -82,10 +83,10 @@ uint8_t  get_adc_interval_check(void)
 	
 	return 0;
 }
+	static uint16_t   addata1 = 0;
 void   get_adc_data_200khz(void)
 {
 #if 1
-	// static uint16_t   addata1 = 0;
 
 	if (run_status_g.status_s == 1)
 	{
@@ -93,14 +94,14 @@ void   get_adc_data_200khz(void)
 		// {
 		// 	return;
 		// }
-		// addata1 = sADC_ReadByte();
+		addata1 = sADC_ReadByte();
 		// addata1 = (addata1 << 2) >> 4;
 		// addata1 = (addata1>>8)+(addata1<<8);
 		// addata1++;
-		// w5500_send_put((char*)&addata1, 2);
+		w5500_send_put((char*)&addata1, 2);
 
 		// sample_nums_count++;
-		// sample_nums_count_all++;
+		sample_nums_count_all++;
 		// __NOP();
 		// if(sample_nums_count >= DATA_BUF_SIZE / 2)
 		// {
