@@ -49,8 +49,11 @@ void    W5500_net_init(void)
    reg_wizchip_cs_cbfunc(SPI_set_slave_select, SPI_clear_slave_select);
  
     /* SPI Read & Write callback function */
+#if SPI_NET_DMA_ENABEL
+   reg_wizchip_spiburst_cbfunc(spi_dma_read, spi_dma_write_for_send);
+#else
    reg_wizchip_spi_cbfunc(sNET_ReadByte, sNET_SendByte);
-
+#endif
 
    // ctlwizchip(CW_RESET_WIZCHIP, 0);
    char tx_buf_size[8] = {2,2,2,2,2,2,2,2};
@@ -84,7 +87,7 @@ void    W5500_net_init(void)
    memset(&gWIZNETINFO, 0, sizeof(gWIZNETINFO));
    gWIZNETINFO.dhcp = 1;
    ctlnetwork(CN_GET_NETINFO, &gWIZNETINFO);
-   printf("mac=%d:%d:%d:%d:%d:%d\n", gWIZNETINFO.mac[0],gWIZNETINFO.mac[1],gWIZNETINFO.mac[2],
+   printf("mac=%x:%x:%x:%x:%x:%x\n", gWIZNETINFO.mac[0],gWIZNETINFO.mac[1],gWIZNETINFO.mac[2],
    gWIZNETINFO.mac[3],gWIZNETINFO.mac[4],gWIZNETINFO.mac[5]);
    printf("ip=%d.%d.%d.%d\n", gWIZNETINFO.ip[0],gWIZNETINFO.ip[1],gWIZNETINFO.ip[2],
    gWIZNETINFO.ip[3]);
@@ -125,11 +128,11 @@ uint16_t  w5500_send( void)
       p_tmp = rx_buf;
       ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
       __enable_irq(); //打开总中断
-#if   SPI_NET_DMA_ENABEL
-      ret = send_for_dma(0, p_tmp, len_t+3);
-#else
+// #if   SPI_NET_DMA_ENABEL
+//       ret = send_for_dma(0, p_tmp, len_t+3);
+// #else
       ret = send(0, p_tmp + 3, len_t);
-#endif
+// #endif
       // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
       // extern unsigned short const default_server_port[]; //= {6800};
       // ret = sendto_for_dma(0, p_tmp, len_t + 3,(uint8_t*) default_server_ip, (unsigned short)default_server_port);
@@ -156,11 +159,11 @@ uint16_t  w5500_send( void)
          p_tmp = rx_buf;
          ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
          __enable_irq(); //打开总中断
-#if   SPI_NET_DMA_ENABEL
-      ret = send_for_dma(0, p_tmp, len_t + 3);
-#else
+// #if   SPI_NET_DMA_ENABEL
+//       ret = send_for_dma(0, p_tmp, len_t + 3);
+// #else
       ret = send(0, p_tmp + 3, len_t);
-#endif
+// #endif
 
          // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
          // extern unsigned short const default_server_port[]; //= {6800};

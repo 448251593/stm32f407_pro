@@ -101,7 +101,7 @@
 //#define sNET_CS_HIGH()      GPIO_SetBits(sNET_CS_GPIO_PORT, sNET_CS_PIN)
 #define sNET_CS_HIGH()      sNET_CS_GPIO_PORT->BSRRL = sNET_CS_PIN;
 
-#define SPI_NET_DMA_ENABEL                       0
+#define SPI_NET_DMA_ENABEL                       1
 #define SPI_NET_DMA_BUFFER_SIZE                  DATA_BUF_SIZE//(1024*6)
 /* Exported functions ------------------------------------------------------- */
 
@@ -129,6 +129,7 @@ void  spi_dma_data_buf_clear(void);
 void  spi_dma_put_data_buf(uint8_t *pdt, uint16_t len);
 void  spi_dma_write(void);
 void spi_dma_read(uint8_t *pRxBuf, uint16_t Rx_size);
+void  spi_dma_write_for_send(uint8_t *pbuf, uint16_t data_size);
 uint8_t* get_spi_dma_data_entry(void);
 #ifdef __cplusplus
 }

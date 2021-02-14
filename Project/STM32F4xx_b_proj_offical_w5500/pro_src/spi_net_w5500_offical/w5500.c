@@ -85,7 +85,8 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 		spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 		WIZCHIP.IF.SPI._write_burst(spi_data, 3);
    }
-   ret = WIZCHIP.IF.SPI._read_byte();
+   // ret = WIZCHIP.IF.SPI._read_byte();
+   WIZCHIP.IF.SPI._read_burst(&ret, 1);//add by bcg,2021-02-14 21:12:47   bug
 
    WIZCHIP.CS._deselect();
    WIZCHIP_CRITICAL_EXIT();

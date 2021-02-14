@@ -2,6 +2,8 @@
 #define _LOOPBACK_H_
 
 #include <stdint.h>
+#include "fifobuffer.h"
+
 
 /* Loopback test debug message printout enable */
 #define	_LOOPBACK_DEBUG_
@@ -17,7 +19,7 @@
 #define LOOPBACK_MAIN_NOBLOCK    0
 #define LOOPBACK_MODE   LOOPBACK_MAIN_NOBLOCK
 
-
+extern FT_FIFO              spi_net_send_Fifo;
 /* TCP server Loopback test example */
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port);
 

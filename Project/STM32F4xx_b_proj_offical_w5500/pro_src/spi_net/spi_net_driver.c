@@ -6,6 +6,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "spi_net_driver.h"
 #include "string.h"
+#include "loopback.h"
 
 /** @addtogroup STM32F4xx_StdPeriph_Examples
   * @{
@@ -278,11 +279,11 @@ void spi_dma_start(void)
 	/* Waiting the end of Data transfer */
 	while (DMA_GetFlagStatus(sNET_TX_DMA_STREAM, sNET_TX_DMA_FLAG_TCIF) == RESET)
 	{
-		// get_adc_data_200khz();
+		get_adc_data_200khz();
 	}
 	while (DMA_GetFlagStatus(sNET_RX_DMA_STREAM, sNET_RX_DMA_FLAG_TCIF) == RESET)
 	{
-		// get_adc_data_200khz();
+		get_adc_data_200khz();
 	}
 
 	/* Clear DMA Transfer Complete Flags */
@@ -305,7 +306,7 @@ void spi_dma_start(void)
 	SPI_Cmd(sNET_SPI, DISABLE);
 
 }
-void  spi_dma_write_for_send(uint8_t *pbuf, uint32_t data_size)
+void  spi_dma_write_for_send(uint8_t *pbuf, uint16_t data_size)
 {
 	DMA_InitStructure.DMA_BufferSize = data_size;
 	/* Configure TX DMA */
@@ -349,7 +350,7 @@ void spi_dma_read(uint8_t *pRxBuf, uint16_t Rx_size)
 	// memset(pTmpBuf1, 0, SPI_NET_DMA_BUFFER_SIZE);
 	// memcpy(pTmpBuf1, pTxBuf, tx_len);
 
-	DMA_InitStructure.DMA_BufferSize = Rx_size + pTmpBuf1_size;
+	DMA_InitStructure.DMA_BufferSize = Rx_size ;
 	/* Configure TX DMA */
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_Channel = sNET_TX_DMA_CHANNEL;
@@ -364,7 +365,7 @@ void spi_dma_read(uint8_t *pRxBuf, uint16_t Rx_size)
 	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)pTmpBufread;
 	DMA_Init(sNET_RX_DMA_STREAM, &DMA_InitStructure);
 	spi_dma_start();
-	memcpy(pRxBuf, pTmpBufread+pTmpBuf1_size, Rx_size);
+	memcpy(pRxBuf, pTmpBufread, Rx_size);
 }
 #endif
 /**
