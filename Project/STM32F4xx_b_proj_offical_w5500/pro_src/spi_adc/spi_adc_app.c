@@ -7,6 +7,7 @@
 #include "usart_app.h"
 #include "socket.h"
 #include "loopback.h"
+#include "app_fifo.h"
 run_ctrl_struct     run_status_g = {
 	.status_s = 0,
 	.min_period = 1,
@@ -83,39 +84,38 @@ uint8_t  get_adc_interval_check(void)
 	
 	return 0;
 }
-	static uint16_t   addata1 = 0;
-void   get_adc_data_200khz(void)
+
+static uint16_t addata1 = 0;
+
+void get_adc_data_200khz(void)
 {
 #if 1
+	uint16_t templen = 0;
 
 	if (run_status_g.status_s == 1)
 	{
-		// if (get_adc_interval_check() == 0)
-		// {
-		// 	return;
-		// }
-		addata1 = sADC_ReadByte();
+		sADC_CS_LOW();
+		templen = sADC_SendByte(sADC_DUMMY_BYTE);
+		sADC_CS_HIGH();
 		// addata1 = (addata1 << 2) >> 4;
 		// addata1 = (addata1>>8)+(addata1<<8);
-		// addata1++;
-		w5500_send_put((char*)&addata1, 2);
+		addata1++;
+#if FIFO_SELECT
+		
+		 ft_fifo_put_ext(&spi_net_send_Fifo, (char *)&addata1);
+		// templen = ft_fifo_put(&spi_net_send_Fifo, (char *)&addata1, 2);
+		// if (templen > 0)
+		// {
+			// sample_nums_count++;
+		// }
+#else
 
-		// sample_nums_count++;
+		app_fifo_put(&spi_net_send_ff, (addata1));
+		// app_fifo_put(&spi_net_send_ff, (uint8_t)(addata1 >> 8));
+#endif
 		sample_nums_count_all++;
 		// __NOP();
-		// if(sample_nums_count >= DATA_BUF_SIZE / 2)
-		// {
-		// 	sample_nums_count = 0;
-		// 	w5500_send_flush();
-		// }
-		// if(sample_nums_count >= NET_SEND_BUF_SIZE / 2)
-		// {
-		// 	run_status_g.status_s = 0;
-		// 	sample_nums_count = 0;
-		// 	w5500_send_flush();
-		// 	LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
-		// 	LOG_INFO ("end=%d\n",run_status_g.time_tick_ms);
-		// }
+
 
 
 		if(run_status_g.time_tick_ms - run_status_g.start_time_ticks >= run_status_g.time_sustain)

@@ -36,6 +36,7 @@
 #include "tim9_driver.h"
 #include "stdio.h"
 #include "w5500.h"
+#include "loopback.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -109,6 +110,7 @@ int main(void)
 		// get_adc_data();
 		get_adc_data_200khz();
 		NetLoop();
+		w5500_send();
 		// if (tmp_count % (1000) == 0)
 		// {
 		// 	led_toggle(LED_Y);

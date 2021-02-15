@@ -47,15 +47,17 @@ extern FT_FIFO *ft_fifo_init(FT_FIFO *fifo, fifo_u8 *buff, fifo_u16 size);
 extern FT_FIFO *ft_fifo_alloc(fifo_u16 size);
 extern void ft_fifo_free(FT_FIFO *fifo);
 extern void ft_fifo_clear(FT_FIFO *fifo);
+extern fifo_u16 ft_fifo_put_ext(FT_FIFO *fifo,
+				  fifo_u8 *buffer);
 extern fifo_u16 ft_fifo_put(FT_FIFO *fifo,
 				  fifo_u8 *buffer, fifo_u16 len);
 extern fifo_u16 ft_fifo_get(FT_FIFO *fifo,
 			   fifo_u8 *buffer, fifo_u16 offset, fifo_u16 len);
-extern fifo_u16 ft_fifo_seek(FT_FIFO *fifo,
-			   fifo_u8 *buffer, fifo_u16 offset, fifo_u16 len);
+// extern fifo_u16 ft_fifo_seek(FT_FIFO *fifo,
+// 			   fifo_u8 *buffer, fifo_u16 offset, fifo_u16 len);
 extern fifo_u16 ft_fifo_setoffset(FT_FIFO *fifo,fifo_u16 offset);
 extern fifo_u16 ft_fifo_getlenth(FT_FIFO *fifo);
-
+extern fifo_u16 ft_fifo_seek(FT_FIFO *fifo, fifo_u8 **buffer,  fifo_u16 len);
 
 #if 0
 

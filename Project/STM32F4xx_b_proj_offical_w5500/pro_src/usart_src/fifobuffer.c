@@ -71,6 +71,41 @@ void ft_fifo_clear(FT_FIFO *fifo)
 }
 
 
+fifo_u16 ft_fifo_put_ext(FT_FIFO *fifo, fifo_u8  *buffer)
+{
+    fifo_u16 l = 0;
+    // fifo_u16 freesize = 0;
+    fifo_u16  temp = 0;
+    fifo_u16  len = 2;
+    //检查FIFO是否有剩余空间
+    if(fifo->cnt >= fifo->size)
+    {
+        return 0;
+    }
+
+    //计算FIFO的剩余空间
+    // freesize = fifo->size - fifo->cnt;
+
+    //取剩余空间与写入长度的较小者，防止溢出
+    len = min(len, fifo->size - fifo->cnt);
+
+    //拷贝数据
+    l = min(len, fifo->size - (fifo->in ) );
+    //拷贝当前位置至末尾的一段
+    memcpy((fifo->buffer + (fifo->in )), buffer, l);
+    //拷贝剩余的一段
+    memcpy((fifo->buffer), (buffer + l), len - l);
+
+    //更新写数据的指针
+    // temp = fifo->in;
+    temp = fifo->in + len;
+    // temp = temp % fifo->size;
+    fifo->in = temp % fifo->size;
+    fifo->cnt += len;
+
+    return len;
+
+}
 /*
 ***********************************************************
 * 函数功能：将源缓冲区的数据拷贝到FIFO,改变写地址
@@ -80,11 +115,11 @@ void ft_fifo_clear(FT_FIFO *fifo)
 ***********************************************************
 */
 fifo_u16 ft_fifo_put(FT_FIFO *fifo, fifo_u8  *buffer, fifo_u16 len)
+// fifo_u16 ft_fifo_put(FT_FIFO *fifo, fifo_u8  *buffer)
 {
     fifo_u16 l = 0;
-    fifo_u16 freesize = 0;
+    // fifo_u16 freesize = 0;
     fifo_u16  temp = 0;
-
     //检查FIFO是否有剩余空间
     if(fifo->cnt >= fifo->size)
     {
@@ -92,23 +127,23 @@ fifo_u16 ft_fifo_put(FT_FIFO *fifo, fifo_u8  *buffer, fifo_u16 len)
     }
 
     //计算FIFO的剩余空间
-    freesize = fifo->size - fifo->cnt;
+    // freesize = fifo->size - fifo->cnt;
 
     //取剩余空间与写入长度的较小者，防止溢出
-    len = min(len, freesize);
+    len = min(len, fifo->size - fifo->cnt);
 
     //拷贝数据
-    l = min(len, fifo->size - (fifo->in % fifo->size) );
+    l = min(len, fifo->size - (fifo->in ) );
     //拷贝当前位置至末尾的一段
-    memcpy((fifo->buffer + (fifo->in % fifo->size)), buffer, l);
+    memcpy((fifo->buffer + (fifo->in )), buffer, l);
     //拷贝剩余的一段
     memcpy((fifo->buffer), (buffer + l), len - l);
 
     //更新写数据的指针
-    temp = fifo->in;
-    temp = temp + len;
-    temp = temp % fifo->size;
-    fifo->in = temp;
+    // temp = fifo->in;
+    temp = fifo->in + len;
+    // temp = temp % fifo->size;
+    fifo->in = temp % fifo->size;
     fifo->cnt += len;
 
     return len;
@@ -250,10 +285,11 @@ fifo_u16 ft_fifo_get(FT_FIFO *fifo, fifo_u8 *buffer, fifo_u16 offset, fifo_u16 l
 * 调用函数：
 ***********************************************************
 */
-fifo_u16 ft_fifo_seek(FT_FIFO *fifo, fifo_u8 *buffer, fifo_u16 offset, fifo_u16 len)
+// fifo_u16 ft_fifo_seek(FT_FIFO *fifo, fifo_u8 *buffer, fifo_u16 offset, fifo_u16 len)
+fifo_u16 ft_fifo_seek(FT_FIFO *fifo, fifo_u8 **buffer,  fifo_u16 len)
 {
     fifo_u16 l = 0;
-    fifo_u16 datasize = 0;
+    // fifo_u16 datasize = 0;
     fifo_u16  temp = 0;
 
     //检查缓冲区内是否有有效数据
@@ -264,28 +300,53 @@ fifo_u16 ft_fifo_seek(FT_FIFO *fifo, fifo_u8 *buffer, fifo_u16 offset, fifo_u16 
 
 
     //计算新的读地址
-    if(offset > fifo->cnt)
-    {
+    // if(offset > fifo->cnt)
+    // {
+    //     return 0;
+    // }
+    // else
+    // {
+        // datasize = fifo->cnt ;
+        // temp = fifo->out;
+        // temp = temp + offset;
+        temp = fifo->out % fifo->size;
+    // }
 
-        return 0;
+    //取需要读取的数据与数据长度的较小者
+    len = min(len,  fifo->cnt);
+
+    //拷贝数据到用户缓存
+    // l = min(len, fifo->size - (temp ));
+    if(len <= (fifo->size - temp))
+    {
+        // memcpy(buffer, (fifo->buffer + (temp )), len);
+        *buffer =fifo->buffer + (temp );
+
+        return len;
     }
     else
     {
-        datasize = fifo->cnt - offset;
-        temp = fifo->out;
-        temp = temp + offset;
-        temp = temp % fifo->size;
+        l =  fifo->size - (temp );
+        // memcpy(buffer, (fifo->buffer + (temp )), l);
+        *buffer =fifo->buffer + (temp );
+
+
+        return    l;
+        // memcpy((buffer + l), (fifo->buffer), len - l);
     }
 
-    //取需要读取的数据与数据长度的较小者
-    len = min(len, datasize);
+    // l = min(len, fifo->size - (temp % fifo->size));
+    // memcpy(buffer, (fifo->buffer + (temp % fifo->size)), l);
+    // memcpy((buffer + l), (fifo->buffer), len - l);
+    // return len;
+//计算新的读地址
+    // l = min(offset, fifo->cnt);
 
-    //拷贝数据到用户缓存
-    l = min(len, fifo->size - (temp % fifo->size));
-    memcpy(buffer, (fifo->buffer + (temp % fifo->size)), l);
-    memcpy((buffer + l), (fifo->buffer), len - l);
-
-    return len;
+    // temp = fifo->out;
+    // temp = temp + l;
+    // temp = temp % fifo->size;
+    // fifo->out = temp;
+    // fifo->cnt -= l;
 
 #if 0
     unsigned char l,temp;

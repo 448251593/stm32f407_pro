@@ -7,6 +7,8 @@
 #include "spi_net_driver.h"
 #include "spi_adc_app.h"
 #include "dhcp.h"
+#include "app_fifo.h"
+extern uint32_t sample_nums_count;
 #if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLCOK
 
 wiz_NetInfo gWIZNETINFO=
@@ -23,10 +25,21 @@ wiz_NetInfo gWIZNETINFO=
 uint32_t  state_update_count= 0 ;
 uint16_t   socket_state = 0;
 
-#define   NET_SEND_BUF_SIZE      1024*80//
+
+#define   NET_SEND_BUF_SIZE      1024*10//
+#if    FIFO_SELECT 
 FT_FIFO              spi_net_send_Fifo;
 unsigned char        spi_net_send_Buf[NET_SEND_BUF_SIZE];
-uint16_t w5500_send(void);
+// FT_FIFO              spi_net_send_Fifo_DMA;
+// unsigned char        spi_net_send_Buf_for_dma[1024*4];
+#else
+app_fifo_t           spi_net_send_ff;
+uint16_t     			spi_net_send_ff_buf[NET_SEND_BUF_SIZE/2];
+
+
+#endif
+
+void w5500_send(void);
 char ptmp[800] = {0};
 
 void Reset_W5500(void)
@@ -97,8 +110,12 @@ void    W5500_net_init(void)
    gWIZNETINFO.gw[3]);
 
    printf("w5500--version=%d\n",getVERSIONR());
-
+#if FIFO_SELECT
    ft_fifo_init(&spi_net_send_Fifo, spi_net_send_Buf, NET_SEND_BUF_SIZE);
+#else
+   app_fifo_init(&spi_net_send_ff, spi_net_send_ff_buf, NET_SEND_BUF_SIZE);
+   memset(spi_net_send_ff_buf, 0, NET_SEND_BUF_SIZE);
+#endif
 }
 uint8_t rx_buf[DATA_BUF_SIZE+3];
 const uint8_t destip[4] = {192, 168, 0, 112};
@@ -112,79 +129,75 @@ void     w5500_send_flush(void)
    return;
 }
 
-uint16_t  w5500_send( void)
+void  w5500_send( void)
 {
    unsigned int len_t;
-   int ret;
+   int ret = 0;
    uint8_t *p_tmp = 0;
-
-   // len_t = ft_fifo_getlenth(&spi_net_send_Fifo);
-   // len_t = spi_net_send_Fifo.cnt;
-   if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
+   uint32_t read_size ;
+   if(socket_state == 0)
    {
-      // if (spi_net_send_Fifo.cnt >= DATA_BUF_SIZE)
-      len_t = DATA_BUF_SIZE;
+      return ;
+   }
+#if FIFO_SELECT
+    len_t = spi_net_send_Fifo.cnt;
+#else
+   len_t = app_uart_fifo_length(&spi_net_send_ff);
+#endif
+   if (len_t >= DATA_BUF_SIZE/2)
+   {
+
+      len_t = DATA_BUF_SIZE/2;
       __disable_irq(); //关闭总中断
+      
+#if FIFO_SELECT
+      ft_fifo_seek(&spi_net_send_Fifo,  &p_tmp ,  len_t);
+#else
       p_tmp = rx_buf;
-      ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
+      app_fifo_read(&spi_net_send_ff, (uint16_t*)p_tmp , &len_t);
+#endif
       __enable_irq(); //打开总中断
-// #if   SPI_NET_DMA_ENABEL
-//       ret = send_for_dma(0, p_tmp, len_t+3);
-// #else
-      ret = send(0, p_tmp + 3, len_t);
-// #endif
-      // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
-      // extern unsigned short const default_server_port[]; //= {6800};
-      // ret = sendto_for_dma(0, p_tmp, len_t + 3,(uint8_t*) default_server_ip, (unsigned short)default_server_port);
+
+      ret = send(0, p_tmp, len_t);
       if (ret > 0)
       {
+#if FIFO_SELECT
          ft_fifo_setoffset(&spi_net_send_Fifo, ret);
-         // w5500_send_flush_flag = 0;
+#endif
       }
-      // else if (ret < 0)
-      // {
-      //    close(0);
-      //    socket_state = Disconnect;
-      // }
-
    }
    else
    {
       if (w5500_send_flush_flag == 1)
       {
          w5500_send_flush_flag = 0;
-         len_t = spi_net_send_Fifo.cnt;
+         // len_t = spi_net_send_Fifo.cnt;
 
          __disable_irq(); //关闭总中断
+         
+#if FIFO_SELECT
+         len_t = ft_fifo_seek(&spi_net_send_Fifo, &p_tmp, len_t);
+#else
          p_tmp = rx_buf;
-         ft_fifo_seek(&spi_net_send_Fifo, p_tmp + 3, 0, len_t);
+         app_fifo_read(&spi_net_send_ff, (uint16_t*)p_tmp , &len_t);
+#endif
          __enable_irq(); //打开总中断
-// #if   SPI_NET_DMA_ENABEL
-//       ret = send_for_dma(0, p_tmp, len_t + 3);
-// #else
-      ret = send(0, p_tmp + 3, len_t);
-// #endif
 
-         // extern unsigned char const default_server_ip[];    // = {192, 168, 2, 112};
-         // extern unsigned short const default_server_port[]; //= {6800};
-         // ret = sendto_for_dma(0, p_tmp, len_t + 3,(uint8_t*) default_server_ip, (unsigned short)default_server_port);
+         ret = send(0, p_tmp , len_t);
          if (ret > 0)
          {
+#if FIFO_SELECT
             ft_fifo_setoffset(&spi_net_send_Fifo, ret);
-            // w5500_send_flush_flag = 0;
+#endif
          }
-         // else if (ret < 0)
-         // {
-         //    close(0);
-         //    socket_state = Disconnect;
-         // }
+
          printf("net send end=%d\n", get_global_tick());
       }
       
    }
-	  return 0;
+	//   return 0;
 }
-extern uint32_t sample_nums_count;
+
 uint16_t  w5500_send_test(void)
 {
     unsigned int len_t;
@@ -193,6 +206,7 @@ uint16_t  w5500_send_test(void)
    {
       return 0;
    }
+   memset(rx_buf, 1,  DATA_BUF_SIZE);
    len_t = DATA_BUF_SIZE;
    ret = send(0, rx_buf , len_t);
    if (ret > 0)
@@ -205,31 +219,32 @@ uint16_t  w5500_send_test(void)
 
 void w5500_send_put(char *p, uint32_t len)
 {
-
     unsigned  int  templen;
    // CPU_SR_ALLOC();
    // CPU_CRITICAL_ENTER();
    __disable_irq(); //关闭总中断
+#if FIFO_SELECT
 
    //  templen = ft_fifo_getlenth(&spi_net_send_Fifo);
 
    //  if (len + templen <= NET_SEND_BUF_SIZE - 1)
    //  {
-   templen = ft_fifo_put(&spi_net_send_Fifo, (unsigned char *)p, len);
+   templen = ft_fifo_put_ext(&spi_net_send_Fifo, (unsigned char *)p);
    if (templen > 0)
    {
       sample_nums_count++;
    }
-   
+#endif
    //  }
    // CPU_CRITICAL_EXIT();
    __enable_irq(); //打开总中断
+
 }
 uint16_t any_port = 	50000;
 #define   LOOP_SN_0   0
 // int32_t loopback_tcpc(uint8_t LOOP_SN_0, uint8_t* buf, uint8_t* destip, uint16_t destport)
 // int32_t loopback_tcpc(void)
-int32_t NetLoop(void)
+void NetLoop(void)
 {
    int32_t ret; // return value for SOCK_ERRORs
    uint16_t size = 0;//, sentsize=0;
@@ -242,20 +257,17 @@ int32_t NetLoop(void)
    // Socket Status Transitions
    // Check the W5500 Socket n status register (Sn_SR, The 'Sn_SR' controlled by Sn_CR command or Packet send/recv status)
    uint8_t  sts= 0;
-  
+   if (state_update_count++ < 40000)
+   {
+      return;
+   }
+   state_update_count = 0;
    sts = getSn_SR(LOOP_SN_0);
    switch(sts)
    {
       case SOCK_ESTABLISHED :
-         if (state_update_count++ > 20000)
-         {
-            state_update_count = 0;
-         }
-         else
-         {
-            w5500_send();
-            return 1;
-         }
+         socket_state = 1;
+
          if(getSn_IR(LOOP_SN_0) & Sn_IR_CON)	// Socket n interrupt register mask; TCP CON interrupt = connection with peer is successful
          {
 #ifdef _LOOPBACK_DEBUG_
@@ -275,7 +287,7 @@ int32_t NetLoop(void)
             ret = recv(LOOP_SN_0, rx_buf, size); // Data Receive process (H/W Rx socket buffer -> User's buffer)
 
             if (ret <= 0)
-               return ret; // If the received data length <= 0, receive failed and process end
+               return ; // If the received data length <= 0, receive failed and process end
              parse_data_handle(rx_buf, ret);
             // sentsize = 0;
 
@@ -289,10 +301,11 @@ int32_t NetLoop(void)
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:CloseWait\r\n",LOOP_SN_0);
 #endif
-         if((ret=disconnect(LOOP_SN_0)) != SOCK_OK) return ret;
+         if((ret=disconnect(LOOP_SN_0)) != SOCK_OK) return ;
 #ifdef _LOOPBACK_DEBUG_
          printf("%d:Socket Closed\r\n", LOOP_SN_0);
 #endif
+         socket_state = 0;
          break;
 
       case SOCK_INIT :
@@ -301,20 +314,22 @@ int32_t NetLoop(void)
       //  printf("LOOP_SN_0=%d,",LOOP_SN_0 );
     	//  printf("Try to connect to the %d.%d.%d.%d : %d\r\n",  destip[0], destip[1], destip[2], destip[3], destport);
 #endif
-    	 if( (ret = connect(LOOP_SN_0, (uint8_t *)destip, destport)) != SOCK_OK) return ret;	//	Try to TCP connect to the TCP server (destination)
+    	 if( (ret = connect(LOOP_SN_0, (uint8_t *)destip, destport)) != SOCK_OK) return ;	//	Try to TCP connect to the TCP server (destination)
+         socket_state = 0;
          break;
       case SOCK_CLOSED:
     	  close(LOOP_SN_0);
-    	  if((ret=socket(LOOP_SN_0, Sn_MR_TCP, any_port++, 0x00)) != LOOP_SN_0) return ret; // TCP socket open with 'any_port' port number
+    	  if((ret=socket(LOOP_SN_0, Sn_MR_TCP, any_port++, 0x00)) != LOOP_SN_0) return ; // TCP socket open with 'any_port' port number
 #ifdef _LOOPBACK_DEBUG_
     	 //printf("%d:TCP client loopback start\r\n",LOOP_SN_0);
          //printf("%d:Socket opened\r\n",LOOP_SN_0);
 #endif
+         socket_state = 0;
          break;
       default:
          break;
    }
-   return 1;
+   return ;
 }
 
 
