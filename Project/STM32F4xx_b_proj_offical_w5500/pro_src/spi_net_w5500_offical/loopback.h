@@ -34,4 +34,5 @@ void   w5500_send_put(char *p, uint32_t len);
 void     w5500_send_flush(void);
 void  NetLoop(void);
 void  w5500_send( void);
+void  w5500_send_ack( uint8_t *pdat_t, uint16_t  len);
 #endif

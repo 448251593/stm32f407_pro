@@ -95,14 +95,14 @@ void get_adc_data_200khz(void)
 	if (run_status_g.status_s == 1)
 	{
 		sADC_CS_LOW();
-		templen = sADC_SendByte(sADC_DUMMY_BYTE);
+		addata1 = sADC_SendByte(sADC_DUMMY_BYTE);
 		sADC_CS_HIGH();
 		// addata1 = (addata1 << 2) >> 4;
 		// addata1 = (addata1>>8)+(addata1<<8);
-		addata1++;
+		
 #if FIFO_SELECT
 		
-		 ft_fifo_put_ext(&spi_net_send_Fifo, (char *)&addata1);
+		 ft_fifo_put_ext(&spi_net_send_Fifo, (uint8_t *)&addata1);
 		// templen = ft_fifo_put(&spi_net_send_Fifo, (char *)&addata1, 2);
 		// if (templen > 0)
 		// {

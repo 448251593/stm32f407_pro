@@ -17,6 +17,7 @@
 #include "spi_adc_app.h"
 #include "main.h"
 #include "tim9_driver.h"
+#include "loopback.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 // #define   UART_SEDNTASK_STK_SIZE   128
@@ -204,6 +205,9 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             extern void adc_read_start(void);
             adc_read_start();
             // LOG_INFO("start=%d\n", get_global_tick());
+            memset(tmp_buf, 0,sizeof(tmp_buf));
+            sprintf((char *)tmp_buf, "start ok\n");
+            w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	
         }
         p2 = strstr((p1), "read");
         if (p2)
@@ -230,6 +234,9 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             {
                 run_status_g.time_sustain = atoi(p2);
                 LOG_INFO("long=%d\n", run_status_g.time_sustain);
+                memset(tmp_buf, 0,sizeof(tmp_buf));
+                sprintf((char *)tmp_buf, "long=%d\n", run_status_g.time_sustain);
+                w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));
             }
         }
         p2 = strstr((p1), "gain=");
@@ -241,6 +248,9 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
                 // run_status_g.time_sustain = atoi(p2);
                 s_adc_gain_set(atoi(p2));
                 LOG_INFO("gain=%d\n", atoi(p2));
+                memset(tmp_buf, 0,sizeof(tmp_buf));
+                sprintf((char *)tmp_buf, "gain=%d\n", atoi(p2));
+							  w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	 
             }
         }
         p2 = strstr((p1), "udp=");

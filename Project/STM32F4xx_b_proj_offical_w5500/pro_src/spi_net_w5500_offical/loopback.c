@@ -129,6 +129,14 @@ void     w5500_send_flush(void)
    return;
 }
 
+void  w5500_send_ack( uint8_t *pdat_t, uint16_t len)
+{
+   if (socket_state == 0)
+   {
+      return;
+   }
+   send(0, pdat_t, len);
+}
 void  w5500_send( void)
 {
    unsigned int len_t;
@@ -191,7 +199,7 @@ void  w5500_send( void)
 #endif
          }
 
-         printf("net send end=%d\n", get_global_tick());
+         printf("net send end=%d,last len=%d\n", get_global_tick(),ret);
       }
       
    }
