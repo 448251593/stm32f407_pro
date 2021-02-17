@@ -205,9 +205,9 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             extern void adc_read_start(void);
             adc_read_start();
             // LOG_INFO("start=%d\n", get_global_tick());
-            memset(tmp_buf, 0,sizeof(tmp_buf));
-            sprintf((char *)tmp_buf, "start ok\n");
-            w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	
+            // memset(tmp_buf, 0,sizeof(tmp_buf));
+            // sprintf((char *)tmp_buf, "start ok\n");
+            // w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	
         }
         p2 = strstr((p1), "read");
         if (p2)
@@ -250,7 +250,7 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
                 LOG_INFO("gain=%d\n", atoi(p2));
                 memset(tmp_buf, 0,sizeof(tmp_buf));
                 sprintf((char *)tmp_buf, "gain=%d\n", atoi(p2));
-							  w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	 
+				w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	 
             }
         }
         p2 = strstr((p1), "udp=");

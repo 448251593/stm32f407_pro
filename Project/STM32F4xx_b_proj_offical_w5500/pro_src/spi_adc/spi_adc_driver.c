@@ -404,6 +404,7 @@ void s_adc_gain_pin_init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(sADC_GAIN1_GPIO_PORT, &GPIO_InitStructure);
+  s_adc_gain_set(ADC_GAIN_0);
 }
 
 void s_adc_gain_set(ADC_GAIN_ENUM id)

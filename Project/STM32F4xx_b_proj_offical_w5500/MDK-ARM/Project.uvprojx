@@ -2021,6 +2021,11 @@
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
             </File>
+            <File>
+              <FileName>app_fifo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\app_fifo.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3495,6 +3500,11 @@
               <FileName>wizchip_conf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_fifo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\pro_src\spi_net_w5500_offical\app_fifo.c</FilePath>
             </File>
           </Files>
         </Group>

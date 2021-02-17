@@ -157,82 +157,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>837</LineNumber>
+          <LineNumber>138</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134224322</Address>
+          <Address>134228046</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\pro_src\spi_net\dhcp.c</Filename>
+          <Filename>..\pro_src\spi_net_w5500_offical\loopback.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\STM32F40_41xxx\../pro_src/spi_net/dhcp.c\837</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>815</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224290</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\pro_src\spi_net\dhcp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\STM32F40_41xxx\../pro_src/spi_net/dhcp.c\815</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>820</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224302</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\pro_src\spi_net\dhcp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\STM32F40_41xxx\../pro_src/spi_net/dhcp.c\820</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>826</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224306</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\pro_src\spi_net\dhcp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\STM32F40_41xxx\../pro_src/spi_net/dhcp.c\826</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>813</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224272</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\pro_src\spi_net\dhcp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\STM32F40_41xxx\../pro_src/spi_net/dhcp.c\813</Expression>
+          <Expression>\\STM32F40_41xxx\../pro_src/spi_net_w5500_offical/loopback.c\138</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -1530,6 +1466,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\pro_src\spi_net_w5500_offical\wizchip_conf.c</PathWithFileName>
       <FilenameWithoutPath>wizchip_conf.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>11</GroupNumber>
+      <FileNumber>80</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\pro_src\spi_net_w5500_offical\app_fifo.c</PathWithFileName>
+      <FilenameWithoutPath>app_fifo.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

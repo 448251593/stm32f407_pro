@@ -71,13 +71,13 @@ uint8_t  get_adc_interval_check(void)
 	
 	int i;
 	sample_interval_count++;
-	if(sample_interval_count > 2)
+	if(sample_interval_count > 1)
 	{
 		sample_interval_count = 0;
 		
 		return 1;
 	}
-	for(i = 0; i <  5; i++)
+	for(i = 0; i <  30; i++)
 	{
 		__NOP();
 	}
@@ -94,6 +94,10 @@ void get_adc_data_200khz(void)
 
 	if (run_status_g.status_s == 1)
 	{
+		if(get_adc_interval_check() == 0)
+		{
+			return ;
+		}
 		sADC_CS_LOW();
 		addata1 = sADC_SendByte(sADC_DUMMY_BYTE);
 		sADC_CS_HIGH();
