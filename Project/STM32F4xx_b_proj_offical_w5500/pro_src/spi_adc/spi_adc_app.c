@@ -70,19 +70,13 @@ uint8_t  get_adc_interval_check(void)
 {
 	
 	int i;
-	sample_interval_count++;
-	if(sample_interval_count > 1)
-	{
-		sample_interval_count = 0;
-		
-		return 1;
-	}
-	for(i = 0; i <  30; i++)
+
+	for(i = 0; i <  20; i++)
 	{
 		__NOP();
 	}
 	
-	return 0;
+	return 1;
 }
 
 static uint16_t addata1 = 0;
