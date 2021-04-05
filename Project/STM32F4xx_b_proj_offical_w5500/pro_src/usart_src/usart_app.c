@@ -180,11 +180,30 @@ uint8_t usart3_set_idle(void)
     usart3_recv_idle = 1;
     return 0;
 }
+void  ack_set_msg_to_pc(uint8_t *buf,uint16_t buf_size, uint8_t *cmd, uint8_t *rslt)
+{
+    memset(buf, 0, buf_size);
+    sprintf((char *)buf, "b>>>%s=%s<<<d\n", cmd, rslt);
+    w5500_send_ack(buf, strlen((const char *)buf));
+    LOG_INFO("%s\n", buf);
+}
+
+void  ack_param_msg_to_pc(uint8_t *buf,uint16_t buf_size)
+{
+    memset(buf, 0, buf_size);
+    sprintf((char *)buf, "b>>>read_param[gain=%d],[sample_num=%d],[usedtime=%d]<<<d\n", 
+    run_status_g.gain,
+    run_status_g.sample_nums_count_all,
+    run_status_g.end_time_ticks - run_status_g.start_time_ticks);
+    w5500_send_ack(buf, strlen((const char *)buf));
+    LOG_INFO("%s\n", buf);
+
+}
 
 void  parse_data_handle(uint8_t *pdat, uint16_t len)
 {
     char *p1, *p2;
-    uint8_t  tmp_buf[50];
+    uint8_t  tmp_buf[150];
     p1 = strstr((const char *)pdat, "set");
     if (p1)
     {
@@ -205,25 +224,21 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             extern void adc_read_start(void);
             adc_read_start();
             // LOG_INFO("start=%d\n", get_global_tick());
-            // memset(tmp_buf, 0,sizeof(tmp_buf));
-            // sprintf((char *)tmp_buf, "start ok\n");
-            // w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	
+
         }
-        p2 = strstr((p1), "read");
+        p2 = strstr((p1), "read_param");
         if (p2)
         {
-            print_run_param();
+            ack_param_msg_to_pc(tmp_buf, sizeof(tmp_buf));
         }
-        //add by bcg,2020-12-16 21:06:40 set sample period us
-        p2 = strstr((p1), "period=");
+        p2 = strstr((p1), "read_gain");
         if (p2)
         {
-            p2 = p2 + strlen("period=");
-            if (isdigit_check(p2))
-            {
-                run_status_g.min_period = atoi(p2);
-                LOG_INFO("period=%d\n", run_status_g.min_period);
-            }
+            memset(tmp_buf, 0, sizeof(tmp_buf));
+            sprintf((char *)tmp_buf, "b>>>read_gain=%d,version=%02d_%02d_%02d<<<d\n", run_status_g.gain,
+            VERSION_MAIN_NUM,VERSION_SUB1_NUM,VERSION_SUB2_NUM);
+            w5500_send_ack(tmp_buf, strlen((const char *)tmp_buf));
+            LOG_INFO("%s\n", tmp_buf);
         }
         //add by bcg,2020-12-16 21:07:09 set how long time run (us),default 100us
         p2 = strstr((p1), "long=");
@@ -234,9 +249,7 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             {
                 run_status_g.time_sustain = atoi(p2);
                 LOG_INFO("long=%d\n", run_status_g.time_sustain);
-                memset(tmp_buf, 0,sizeof(tmp_buf));
-                sprintf((char *)tmp_buf, "long=%d\n", run_status_g.time_sustain);
-                w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));
+                ack_set_msg_to_pc(tmp_buf, sizeof(tmp_buf), "long=", p2);
             }
         }
         p2 = strstr((p1), "gain=");
@@ -245,19 +258,18 @@ void  parse_data_handle(uint8_t *pdat, uint16_t len)
             p2 = p2 + strlen("gain=");
             if (isdigit_check(p2))
             {
-                // run_status_g.time_sustain = atoi(p2);
+                run_status_g.gain = atoi(p2);
                 s_adc_gain_set(atoi(p2));
                 LOG_INFO("gain=%d\n", atoi(p2));
-                memset(tmp_buf, 0,sizeof(tmp_buf));
-                sprintf((char *)tmp_buf, "gain=%d\n", atoi(p2));
-				w5500_send_ack( tmp_buf, strlen((const char *)tmp_buf));	 
+                ack_set_msg_to_pc(tmp_buf, sizeof(tmp_buf), "gain=", p2) ;
             }
         }
-        p2 = strstr((p1), "udp=");
+        p2 = strstr((p1), "stop");
         if (p2)
         {
+            LOG_INFO("stop\n");
+            adc_read_stop();
 
-            LOG_INFO("udp\n");
         }
     }
 }

@@ -152,10 +152,10 @@ void  w5500_send( void)
 #else
    len_t = app_uart_fifo_length(&spi_net_send_ff);
 #endif
-   if (len_t >= DATA_BUF_SIZE/2)
+   if (len_t > 0)
    {
 
-      len_t = DATA_BUF_SIZE/2;
+      // len_t = DATA_BUF_SIZE/2;
       __disable_irq(); //关闭总中断
       
 #if FIFO_SELECT
@@ -173,35 +173,6 @@ void  w5500_send( void)
          ft_fifo_setoffset(&spi_net_send_Fifo, ret);
 #endif
       }
-   }
-   else
-   {
-      if (w5500_send_flush_flag == 1)
-      {
-         w5500_send_flush_flag = 0;
-         // len_t = spi_net_send_Fifo.cnt;
-
-         __disable_irq(); //关闭总中断
-         
-#if FIFO_SELECT
-         len_t = ft_fifo_seek(&spi_net_send_Fifo, &p_tmp, len_t);
-#else
-         p_tmp = rx_buf;
-         app_fifo_read(&spi_net_send_ff, (uint16_t*)p_tmp , &len_t);
-#endif
-         __enable_irq(); //打开总中断
-
-         ret = send(0, p_tmp , len_t);
-         if (ret > 0)
-         {
-#if FIFO_SELECT
-            ft_fifo_setoffset(&spi_net_send_Fifo, ret);
-#endif
-         }
-
-         printf("net send end=%d,last len=%d\n", get_global_tick(),ret);
-      }
-      
    }
 	//   return 0;
 }

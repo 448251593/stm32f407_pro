@@ -25,6 +25,7 @@ void   spi_adc_init(void)
 }
 
 uint32_t ittt;
+//提高速度不在使用这个函数
 uint16_t spi_adc_read(void)
 {
 
@@ -41,12 +42,33 @@ uint16_t addata1 = 0;
 	// // ittt = (ittt * 3300 / 4096);
 	// return (uint16_t)ittt;
 }
+
+void  adc_read_stop(void)
+{
+	run_status_g.status_s = 2;
+
+}
+static uint16_t addata1 = 0;
+static uint16_t ad_data_average = 0;
+
 void  adc_read_start(void)
 {
 	run_status_g.status_s = 1;
 	run_status_g.start_time_ticks = get_global_tick();
 	sample_nums_count_all = 0;
 	sample_nums_count = 0;
+
+	sADC_CS_LOW();
+	ad_data_average = sADC_SendByte(sADC_DUMMY_BYTE);
+	sADC_CS_HIGH();
+	if (ad_data_average > 2048)
+	{
+		ad_data_average = ad_data_average - 2048;
+	}
+	else
+	{
+		ad_data_average = 2048 - ad_data_average;
+	}
 #if USART_DMA_TX_ENABEL
 	dma_start_times = 0;
 #endif
@@ -71,7 +93,7 @@ uint8_t  get_adc_interval_check(void)
 	
 	int i;
 
-	for(i = 0; i <  20; i++)
+	for(i = 0; i <  95; i++)
 	{
 		__NOP();
 	}
@@ -79,7 +101,8 @@ uint8_t  get_adc_interval_check(void)
 	return 1;
 }
 
-static uint16_t addata1 = 0;
+
+
 
 void get_adc_data_200khz(void)
 {
@@ -88,59 +111,66 @@ void get_adc_data_200khz(void)
 
 	if (run_status_g.status_s == 1)
 	{
-		if(get_adc_interval_check() == 0)
+		if (get_adc_interval_check() == 0)
 		{
-			return ;
+			return;
 		}
+		//不调用函数.直接通过 spi 读取数据
 		sADC_CS_LOW();
 		addata1 = sADC_SendByte(sADC_DUMMY_BYTE);
 		sADC_CS_HIGH();
-		// addata1 = (addata1 << 2) >> 4;
-		// addata1 = (addata1>>8)+(addata1<<8);
-		
+		addata1 = (addata1 << 2) >> 4;
+		if(addata1 > 2048)
+		{
+			addata1 = addata1 - 2048;
+		}
+		else
+		{
+			addata1 =  2048 - addata1;
+		}
+		// addata1 = (addata1 >> 8) + (addata1 << 8);
+
+		ad_data_average = (ad_data_average + addata1) / 2;
+		sample_nums_count_all++;
 #if FIFO_SELECT
-		
-		 ft_fifo_put_ext(&spi_net_send_Fifo, (uint8_t *)&addata1);
-		// templen = ft_fifo_put(&spi_net_send_Fifo, (char *)&addata1, 2);
-		// if (templen > 0)
-		// {
-			// sample_nums_count++;
-		// }
+		// 使用优化过的接口存放数据
+		if (sample_nums_count_all % 20000 == 0)
+		{
+
+			ft_fifo_put_ext(&spi_net_send_Fifo, (uint8_t *)&ad_data_average);
+			templen = ft_fifo_put(&spi_net_send_Fifo, (char *)&addata1, 2);
+			if (templen > 0)
+			{
+			sample_nums_count++;
+			}
+		}
 #else
 
 		app_fifo_put(&spi_net_send_ff, (addata1));
 		// app_fifo_put(&spi_net_send_ff, (uint8_t)(addata1 >> 8));
 #endif
-		sample_nums_count_all++;
+
 		// __NOP();
-
-
-
-		if(run_status_g.time_tick_ms - run_status_g.start_time_ticks >= run_status_g.time_sustain)
-		{
-			run_status_g.status_s = 0;
-			w5500_send_flush();
-			LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
-			LOG_INFO("sample_nums put fifo ok=%d\n",sample_nums_count);
-
-			LOG_INFO ("starts->end (ms)=,%d-%d\n",run_status_g.start_time_ticks, run_status_g.time_tick_ms);
-		}
-
+		// 调试校对 1s采样数据用
+		// if ( run_status_g.time_tick_ms - run_status_g.start_time_ticks > 1000)
+		// {
+		// 	run_status_g.status_s = 2;
+		// }
+	}
+	else if (run_status_g.status_s == 2 )
+	{
+		run_status_g.status_s = 0;//停止后状态修改为0
+		run_status_g.end_time_ticks = run_status_g.time_tick_ms;
+		run_status_g.sample_nums_count_all = sample_nums_count_all;
+		LOG_INFO("sample_nums_count_all=%d\n",sample_nums_count_all);
+		LOG_INFO ("starts->end (ms)=,%d-%d=%d\n",
+		run_status_g.start_time_ticks, run_status_g.time_tick_ms,
+		run_status_g.end_time_ticks - run_status_g.start_time_ticks);
+		sample_nums_count_all = 0;
 	}
 	#endif
 }
-void   print_run_param(void)
-{
-	char   tmp_buf[100];
-	tmp_buf[0] = 0x7e;
-	tmp_buf[1] = 0x7f;
-	tmp_buf[2] = 0x7f;
-	tmp_buf[3] = 0x7e;
-	Usart3SendData((char*)tmp_buf, 4);
-	Usart3SendData((char*)&run_status_g, sizeof(run_status_g));
-	Usart3SendData((char*)tmp_buf, 4);
 
-}
 
 uint16_t   get_adc_data_finish(void)
 {

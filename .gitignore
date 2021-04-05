@@ -5,3 +5,12 @@
 *.chm
 STM32F40_41xxx/
 Documentation/
+app/
+STM32F4xx_usart_dma/
+*.patch
+*.rar
+下载资料/
+*copy.c
+STM32F4xx_b_proj_test_w5500/
+STM32F4xx_b_proj_test_w5500_taobao/
+tcpserver_c/

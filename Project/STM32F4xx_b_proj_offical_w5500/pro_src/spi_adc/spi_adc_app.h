@@ -9,11 +9,16 @@ typedef struct
 	uint32_t 	time_tick_ms;//add by bcg,2020-12-20 19:31:39  sysytem ticks ms
 	uint32_t    sample_nums_count_all;
 	uint32_t    start_time_ticks;
+
+	uint32_t    end_time_ticks;
+	uint16_t    gain; //add by bcg,2021-04-02 22:23:30 增益控制
+
+
 }run_ctrl_struct;
 extern run_ctrl_struct     run_status_g;
 uint16_t spi_adc_read(void);
 void  adc_read_start(void);
-
+void  adc_read_stop(void);
 void  adc_read_deal(void);
 
 void   get_adc_data(void);
