@@ -49,7 +49,7 @@ void  adc_read_stop(void)
 
 }
 static uint16_t addata1 = 0;
-static uint16_t ad_data_average = 0;
+static uint32_t ad_data_average = 0;
 
 void  adc_read_start(void)
 {
@@ -120,6 +120,7 @@ void get_adc_data_200khz(void)
 		addata1 = sADC_SendByte(sADC_DUMMY_BYTE);
 		sADC_CS_HIGH();
 		addata1 = (addata1 << 2) >> 4;
+		// addata1 = (addata1 >> 8) + (addata1 << 8);
 		if(addata1 > 2048)
 		{
 			addata1 = addata1 - 2048;
@@ -128,21 +129,23 @@ void get_adc_data_200khz(void)
 		{
 			addata1 =  2048 - addata1;
 		}
-		// addata1 = (addata1 >> 8) + (addata1 << 8);
+		
 
-		ad_data_average = (ad_data_average + addata1) / 2;
+		ad_data_average = (ad_data_average + addata1);
 		sample_nums_count_all++;
 #if FIFO_SELECT
 		// 使用优化过的接口存放数据
 		if (sample_nums_count_all % 20000 == 0)
 		{
-
+			ad_data_average = ad_data_average / 20000;
 			ft_fifo_put_ext(&spi_net_send_Fifo, (uint8_t *)&ad_data_average);
+			#if 0
 			templen = ft_fifo_put(&spi_net_send_Fifo, (char *)&addata1, 2);
 			if (templen > 0)
 			{
 			sample_nums_count++;
 			}
+			#endif
 		}
 #else
 
@@ -167,6 +170,7 @@ void get_adc_data_200khz(void)
 		run_status_g.start_time_ticks, run_status_g.time_tick_ms,
 		run_status_g.end_time_ticks - run_status_g.start_time_ticks);
 		sample_nums_count_all = 0;
+		w5500_send_flush();
 	}
 	#endif
 }
