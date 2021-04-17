@@ -386,6 +386,10 @@ void sADC_LowLevel_DeInit(void)
 #define sADC_GAIN1_GPIO_PORT                  GPIOB
 #define sADC_GAIN1_GPIO_CLK                   RCC_AHB1Periph_GPIOB
 
+#define sADC_GAIN0_PIN_1                        GPIO_Pin_0
+#define sADC_GAIN0_GPIO_PORT_1                  GPIOA
+#define sADC_GAIN0_GPIO_CLK_1                   RCC_AHB1Periph_GPIOA
+
 #define sADC_GAIN0_PIN                        GPIO_Pin_0
 #define sADC_GAIN0_GPIO_PORT                  GPIOB
 #define sADC_GAIN0_GPIO_CLK                   RCC_AHB1Periph_GPIOB
@@ -404,6 +408,13 @@ void s_adc_gain_pin_init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(sADC_GAIN1_GPIO_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = sADC_GAIN0_PIN_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(sADC_GAIN0_GPIO_PORT_1, &GPIO_InitStructure);
   s_adc_gain_set(ADC_GAIN_0);
 }
 
@@ -413,18 +424,22 @@ void s_adc_gain_set(ADC_GAIN_ENUM id)
   {
   case ADC_GAIN_0:
     GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_ResetBits(sADC_GAIN0_GPIO_PORT_1, sADC_GAIN0_PIN_1);
     GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
   case ADC_GAIN_2:
     GPIO_ResetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_ResetBits(sADC_GAIN0_GPIO_PORT_1, sADC_GAIN0_PIN_1);
     GPIO_SetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
   case ADC_GAIN_1:
     GPIO_SetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_SetBits(sADC_GAIN0_GPIO_PORT_1, sADC_GAIN0_PIN_1);
     GPIO_ResetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
   case ADC_GAIN_3:
     GPIO_SetBits(sADC_GAIN0_GPIO_PORT, sADC_GAIN0_PIN);
+    GPIO_SetBits(sADC_GAIN0_GPIO_PORT_1, sADC_GAIN0_PIN_1);
     GPIO_SetBits(sADC_GAIN1_GPIO_PORT, sADC_GAIN1_PIN);
     break;
 

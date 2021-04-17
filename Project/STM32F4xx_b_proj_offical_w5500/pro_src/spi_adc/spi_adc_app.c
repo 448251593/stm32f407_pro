@@ -93,7 +93,7 @@ uint8_t  get_adc_interval_check(void)
 	
 	int i;
 
-	for(i = 0; i <  95; i++)
+	for(i = 0; i < 23; i++)
 	{
 		__NOP();
 	}
